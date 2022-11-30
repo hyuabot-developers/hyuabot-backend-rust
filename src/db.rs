@@ -4,12 +4,13 @@ use diesel::r2d2::ConnectionManager;
 use lazy_static::lazy_static;
 use r2d2;
 use std::env;
+use std::ops::{DerefMut};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 pub type DBConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
-const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
 lazy_static!{
     pub static ref DB_POOL: Pool = {
         let host: String = env::var("POSTGRES_HOST").expect("POSTGRES_HOST must be set");
@@ -24,12 +25,12 @@ lazy_static!{
 }
 
 
-pub fn initialize_connection_pool() {
+pub fn init() {
     lazy_static::initialize(&DB_POOL);
-    let mut conn = establish_connection();
-    conn.run_pending_migrations(MIGRATIONS).unwrap();
+    let mut conn = connection().expect("Failed to get connection from pool");
+    conn.deref_mut().run_pending_migrations(MIGRATIONS).expect("Failed to run migrations");
 }
 
-pub fn establish_connection() -> Result<DBConnection, CustomError>{
+pub fn connection() -> Result<DBConnection, CustomError>{
     DB_POOL.get().map_err(|e| CustomError::new(500, format!("Failed to get database connection: {}", e)))
 }
