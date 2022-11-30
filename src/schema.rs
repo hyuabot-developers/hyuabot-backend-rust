@@ -109,10 +109,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    menu (restaurant_id, time_type, menu) {
+    menu (restaurant_id, time_type, menu_name) {
         restaurant_id -> Int4,
         time_type -> Varchar,
-        menu -> Varchar,
+        menu_name -> Varchar,
         menu_price -> Varchar,
     }
 }

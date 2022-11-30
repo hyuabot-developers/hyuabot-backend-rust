@@ -18,7 +18,7 @@ create table if not exists restaurant(
 create table if not exists menu(
     restaurant_id int not null, -- 식당 ID
     time_type varchar(10) not null, -- 시간 타입 (아침, 점심, 저녁)
-    menu varchar(100) not null, -- 메뉴 이름
+    menu_name varchar(100) not null, -- 메뉴 이름
     menu_price varchar(30) not null, -- 메뉴 가격
     constraint pk_menu primary key (restaurant_id, time_type, menu),
     constraint fk_restaurant_id foreign key (restaurant_id) references restaurant(restaurant_id)
