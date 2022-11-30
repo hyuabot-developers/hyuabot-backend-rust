@@ -8,9 +8,10 @@ use std::ops::{DerefMut};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
-pub type DBConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
+pub type DBConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!();
+
 lazy_static!{
     pub static ref DB_POOL: Pool = {
         let host: String = env::var("POSTGRES_HOST").expect("POSTGRES_HOST must be set");
