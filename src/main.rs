@@ -6,6 +6,7 @@ mod schema;
 mod model;
 mod response;
 mod rest;
+mod request;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
