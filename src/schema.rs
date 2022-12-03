@@ -1,11 +1,5 @@
 // @generated automatically by Diesel CLI.
 
-pub mod sql_types {
-    #[derive(diesel::sql_types::SqlType)]
-    #[diesel(postgres_type(name = "timetz", schema = "pg_catalog"))]
-    pub struct Timetz;
-}
-
 diesel::table! {
     bus_realtime (stop_id, route_id, arrival_sequence) {
         stop_id -> Int4,
@@ -19,18 +13,15 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::Timetz;
-
     bus_route (route_id) {
         company_id -> Nullable<Int4>,
         company_name -> Varchar,
         company_telephone -> Varchar,
         district_code -> Int4,
-        up_first_time -> Timetz,
-        up_last_time -> Timetz,
-        down_first_time -> Timetz,
-        down_last_time -> Timetz,
+        up_first_time -> Time,
+        up_last_time -> Time,
+        down_first_time -> Time,
+        down_last_time -> Time,
         start_stop_id -> Int4,
         end_stop_id -> Int4,
         route_id -> Int4,
@@ -61,13 +52,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::Timetz;
-
     bus_timetable (route_id, start_stop_id, departure_time, weekday) {
         route_id -> Int4,
         start_stop_id -> Int4,
-        departure_time -> Timetz,
+        departure_time -> Time,
         weekday -> Varchar,
     }
 }
@@ -97,14 +85,11 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::Timetz;
-
     commute_shuttle_timetable (route_name, stop_name) {
         route_name -> Varchar,
         stop_name -> Varchar,
         stop_order -> Nullable<Int4>,
-        departure_time -> Timetz,
+        departure_time -> Time,
     }
 }
 
@@ -152,8 +137,8 @@ diesel::table! {
 diesel::table! {
     shuttle_period (period_type, period_start, period_end) {
         period_type -> Varchar,
-        period_start -> Timestamptz,
-        period_end -> Timestamptz,
+        period_start -> Timestamp,
+        period_end -> Timestamp,
     }
 }
 
@@ -189,9 +174,6 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::Timetz;
-
     shuttle_timetable (period_type, weekday, route_name, departure_time) {
         period_type -> Varchar,
         weekday -> Bool,
@@ -242,13 +224,10 @@ diesel::table! {
 }
 
 diesel::table! {
-    use diesel::sql_types::*;
-    use super::sql_types::Timetz;
-
     subway_timetable (station_id, up_down_type, weekday, departure_time) {
         station_id -> Varchar,
         terminal_station_id -> Varchar,
-        departure_time -> Timetz,
+        departure_time -> Time,
         weekday -> Varchar,
         up_down_type -> Varchar,
     }

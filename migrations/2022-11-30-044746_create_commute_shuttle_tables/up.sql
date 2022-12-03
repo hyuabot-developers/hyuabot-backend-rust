@@ -18,6 +18,6 @@ create table if not exists commute_shuttle_timetable (
     route_name varchar(15) references commute_shuttle_route(route_name),
     stop_name varchar(50) references commute_shuttle_stop(stop_name),
     stop_order int,
-    departure_time timetz not null,
+    departure_time time not null,
     constraint pk_commute_shuttle_route_stop primary key (route_name, stop_name)
 );

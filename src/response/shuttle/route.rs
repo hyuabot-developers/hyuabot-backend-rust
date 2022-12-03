@@ -22,6 +22,7 @@ pub struct ShuttleRouteResponse {
     pub route_name: String,
     pub description: ShuttleDescriptionItem,
     pub stop_list: Vec<ShuttleRouteStopItemResponse>,
+    pub location: Vec<ShuttleLocationItem>
 }
 
 #[derive(Serialize)]
@@ -44,10 +45,31 @@ pub struct ShuttleFirstLastTimeItem {
     pub last: String,
 }
 
+#[derive(Serialize)]
+pub struct ShuttleLocationItem {
+    pub location: f32,
+}
+
 impl ShuttleRouteResponse {
-    pub fn new(route: ShuttleRouteItem, stop_items: &Vec<ShuttleRouteStopItem>, timetable: &Vec<ShuttleTimeTableItem>) -> Self {
+    pub fn new(route: ShuttleRouteItem, weekday: &str, stop_items: &Vec<ShuttleRouteStopItem>, timetable: &Vec<ShuttleTimeTableItem>) -> Self {
         let weekdays_shuttle = timetable.iter().filter(|item| item.weekday).collect::<Vec<&ShuttleTimeTableItem>>();
-        let weekends_shuttle = timetable.iter().filter(|item| !(item.weekday)).collect::<Vec<&ShuttleTimeTableItem>>();
+        let weekends_shuttle = timetable.iter().filter(|item| !item.weekday).collect::<Vec<&ShuttleTimeTableItem>>();
+        let first_cumulative_time = match stop_items.first() {
+            Some(item) => item.cumulative_time.unwrap() * -1,
+            None => 0,
+        };
+        let last_cumulative_time = match stop_items.last() {
+            Some(item) => item.cumulative_time.unwrap() * -1,
+            None => 0,
+        };
+        let running_shuttle = match weekday {
+            "holiday" => Vec::new(),
+            _ => timetable.iter().filter(|item|
+                item.weekday == (weekday == "weekdays") &&
+                    item.departure_time <= chrono::Local::now().time().add(Duration::minutes(first_cumulative_time as i64)) &&
+                    item.departure_time >= chrono::Local::now().time().add(Duration::minutes(last_cumulative_time as i64))
+            ).collect::<Vec<&ShuttleTimeTableItem>>(),
+        };
         let mut stop_list = Vec::new();
         let _ = stop_items.iter().map(
             |stop_item| {
@@ -77,6 +99,20 @@ impl ShuttleRouteResponse {
                 });
             }
         ).collect::<Vec<()>>();
+        let mut location = Vec::new();
+        let _ = running_shuttle.iter()
+            .map(|item| {
+                let departed_before = (chrono::Local::now().time() - item.departure_time).num_minutes() as i32;
+                let current = stop_items.iter().find(|stop_item| stop_item.cumulative_time.unwrap() >= departed_before).unwrap();
+                location.push(ShuttleLocationItem {
+                    location: if current.cumulative_time.unwrap() == departed_before || current.stop_order.unwrap() == 0 {
+                        current.stop_order.unwrap() as f32
+                    } else {
+                        let previous_cumulative_time = stop_items[(current.stop_order.unwrap() - 1) as usize].cumulative_time.unwrap();
+                        (departed_before as f32 - previous_cumulative_time as f32) / (current.cumulative_time.unwrap() - previous_cumulative_time) as f32 + (current.stop_order.unwrap() - 1) as f32
+                    },
+                });
+            }).collect::<Vec<()>>();
         ShuttleRouteResponse {
             route_name: route.route_name,
             description: ShuttleDescriptionItem {
@@ -84,6 +120,7 @@ impl ShuttleRouteResponse {
                 english: route.description_english.unwrap_or_else(|| "".to_string()),
             },
             stop_list,
+            location,
         }
     }
 }

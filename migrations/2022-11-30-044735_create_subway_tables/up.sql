@@ -43,7 +43,7 @@ create table if not exists subway_realtime(
 create table if not exists subway_timetable(
     station_id varchar(10) not null, -- 역 ID
     terminal_station_id varchar(10) not null, -- 종착역 ID
-    departure_time timetz not null, -- 출발 시간
+    departure_time time not null, -- 출발 시간
     weekday varchar(10) not null, -- 평일, 토요일, 일요일 여부
     up_down_type varchar(10) not null, -- 상행, 하행 여부
     constraint pk_subway_timetable primary key (station_id, up_down_type, weekday, departure_time),

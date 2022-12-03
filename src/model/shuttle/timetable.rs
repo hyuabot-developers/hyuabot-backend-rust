@@ -20,10 +20,11 @@ pub struct ShuttleTimeTableItem {
 }
 
 impl ShuttleTimeTableItem {
-    pub fn get_timetable_by_route_name(route_name_query: &str) -> Result<Vec<ShuttleTimeTableItem>, diesel::result::Error> {
+    pub fn get_timetable_by_route_name(route_name_query: &str, period_query: &str) -> Result<Vec<ShuttleTimeTableItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let timetable = shuttle_timetable
             .filter(route_name.eq(route_name_query))
+            .filter(period_type.eq(period_query))
             .order(departure_time.asc())
             .load::<ShuttleTimeTableItem>(&mut conn)?;
         Ok(timetable)
