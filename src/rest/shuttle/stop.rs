@@ -33,8 +33,6 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>) -> Result<HttpRe
     // let stop_list = ShuttleRouteStopItem::get_stop_list_by_route_name(route_id.borrow())?;
     // let timetable = ShuttleTimeTableItem::get_timetable_by_route_name(route_id.borrow(), &period.period_type)?;
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
-        stop.stop_name,
-        stop.latitude,
-        stop.longitude,
+        stop
     )))
 }
