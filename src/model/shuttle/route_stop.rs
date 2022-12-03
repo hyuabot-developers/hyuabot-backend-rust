@@ -28,4 +28,13 @@ impl ShuttleRouteStopItem {
             .load::<ShuttleRouteStopItem>(&mut conn)?;
         Ok(stops)
     }
+
+    pub fn get_route_list_by_stop_name(stop_name_query: &str) -> Result<Vec<ShuttleRouteStopItem>, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let routes = shuttle_route_stop
+            .filter(stop_name.eq(stop_name_query))
+            .order(route_name.asc())
+            .load::<ShuttleRouteStopItem>(&mut conn)?;
+        Ok(routes)
+    }
 }
