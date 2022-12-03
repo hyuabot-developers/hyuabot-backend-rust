@@ -18,6 +18,7 @@ async fn main() -> std::io::Result<()> {
                     .service(rest::shuttle::routes::get_shuttle_route_by_id)
                     .service(rest::shuttle::routes::get_shuttle_location_by_id)
                     .service(rest::shuttle::stop::get_shuttle_stop)
+                    .service(rest::shuttle::stop::get_shuttle_stop_by_id)
             )
         })
         .bind(("127.0.0.1", 8080))?
