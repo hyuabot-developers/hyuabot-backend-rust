@@ -196,7 +196,7 @@ diesel::table! {
         period_type -> Varchar,
         weekday -> Bool,
         route_name -> Varchar,
-        departure_time -> Timetz,
+        departure_time -> Time,
         start_stop -> Varchar,
     }
 }

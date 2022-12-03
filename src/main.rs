@@ -15,6 +15,7 @@ async fn main() -> std::io::Result<()> {
             App::new().service(
                 web::scope("/rest")
                     .service(rest::shuttle::routes::get_shuttle_route)
+                    .service(rest::shuttle::routes::get_shuttle_route_by_id)
             )
         })
         .bind(("127.0.0.1", 8080))?

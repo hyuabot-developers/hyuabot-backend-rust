@@ -15,6 +15,7 @@ pub struct ShuttleRouteItem {
     pub description_english: Option<String>,
 }
 
+
 impl ShuttleRouteItem {
     pub fn find_all() -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
@@ -28,5 +29,13 @@ impl ShuttleRouteItem {
             .filter(route_name.like(format!("%{}%", route_name_query)))
             .load::<ShuttleRouteItem>(&mut conn)?;
         Ok(routes)
+    }
+
+    pub fn get_one_by_name(route_name_query: &str) -> Result<Self, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let route = shuttle_route
+            .filter(route_name.eq(route_name_query))
+            .first::<ShuttleRouteItem>(&mut conn)?;
+        Ok(route)
     }
 }
