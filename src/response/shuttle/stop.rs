@@ -37,7 +37,8 @@ pub struct ShuttleStopLocationResponse {
 pub struct ShuttleRouteStopResponse {
     pub name: String,
     pub description: ShuttleRouteDescriptionResponse,
-    pub timetable: Vec<String>
+    pub timetable: Vec<String>,
+    pub arrival_list: Vec<i64>,
 }
 
 #[derive(Serialize)]
@@ -101,6 +102,7 @@ impl ShuttleRouteStopResponse {
     pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>) -> Self {
         let description_korean = route.description_korean.clone().unwrap_or("".to_string());
         let description_english = route.description_english.clone().unwrap_or("".to_string());
+        let now = chrono::Local::now().time();
         ShuttleRouteStopResponse {
             name: route.route_name.clone(),
             description: ShuttleRouteDescriptionResponse{
@@ -109,6 +111,9 @@ impl ShuttleRouteStopResponse {
             },
             timetable: timetable_list.iter().map(
                 |item| (item.departure_time.clone() + Duration::minutes(route.cumulative_time.unwrap() as i64)).to_string()
+            ).collect(),
+            arrival_list: timetable_list.iter().map(
+                |item| (item.departure_time.clone() + Duration::minutes(route.cumulative_time.unwrap() as i64) - now).num_minutes()
             ).collect(),
         }
     }
