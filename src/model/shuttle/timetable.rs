@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::Sub;
 use chrono::{Duration, NaiveTime};
 use diesel::prelude::*;
 
@@ -42,21 +42,34 @@ impl ShuttleTimeTableItem {
 }
 
 impl ShuttleTimeTableByShuttleStopItem {
-    pub fn get_timetable_by_stop_name(period_query: &str, weekday_query: &bool, route_list: &Vec<ShuttleRouteStopItemWithDescription>, limit: &i64) -> Result<Vec<ShuttleTimeTableByShuttleStopItem>, diesel::result::Error> {
+    pub fn get_timetable_by_stop_name(period_query: &str, weekday_query: &bool, route_list: &Vec<ShuttleRouteStopItemWithDescription>, limit: &i64, show_all: &Option<bool>) -> Result<Vec<ShuttleTimeTableByShuttleStopItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let mut timetable = Vec::new();
         let now = chrono::Local::now().naive_local();
-        for route in route_list {
-            let mut timetable_by_route = shuttle_timetable
-                .select((route_name, departure_time))
-                .filter(route_name.eq(&route.route_name))
-                .filter(period_type.eq(period_query))
-                .filter(weekday.eq(weekday_query))
-                .filter(departure_time.gt(now.time().sub(Duration::minutes(route.cumulative_time.unwrap_or(0) as i64))))
-                .order(departure_time.asc())
-                .limit(limit.clone())
-                .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
-            timetable.append(&mut timetable_by_route);
+        if show_all.is_some() && show_all.unwrap() {
+            for route in route_list {
+                let mut route_timetable = shuttle_timetable
+                    .select((route_name, departure_time))
+                    .filter(route_name.eq(&route.route_name))
+                    .filter(period_type.eq(period_query))
+                    .filter(weekday.eq(weekday_query))
+                    .order(departure_time.asc())
+                    .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
+                timetable.append(&mut route_timetable);
+            }
+        } else {
+            for route in route_list {
+                let mut timetable_by_route = shuttle_timetable
+                    .select((route_name, departure_time))
+                    .filter(route_name.eq(&route.route_name))
+                    .filter(period_type.eq(period_query))
+                    .filter(weekday.eq(weekday_query))
+                    .filter(departure_time.gt(now.time().sub(Duration::minutes(route.cumulative_time.unwrap_or(0) as i64))))
+                    .order(departure_time.asc())
+                    .limit(limit.clone())
+                    .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
+                timetable.append(&mut timetable_by_route);
+            }
         }
         Ok(timetable)
     }

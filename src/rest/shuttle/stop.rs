@@ -37,6 +37,6 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query:
     let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(stop_id.borrow())?;
     let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
-        stop, &route_list, &period, &(weekday == "weekdays"), &limit
+        stop, &route_list, &period, &(weekday == "weekdays"), &limit, &stop_item_query.show_all,
     )))
 }
