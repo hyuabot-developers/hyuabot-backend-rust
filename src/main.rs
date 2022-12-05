@@ -1,5 +1,4 @@
 use actix_web::{App, HttpServer, web};
-use actix_web::web::service;
 
 mod db;
 mod error_handler;
@@ -23,6 +22,8 @@ async fn main() -> std::io::Result<()> {
                     .service(rest::shuttle::stop::get_shuttle_route_stop_item)
                     .service(rest::shuttle::stop::get_shuttle_route_stop_timetable_item)
                     .service(rest::shuttle::stop::get_shuttle_route_stop_arrival_item)
+                    .service(rest::shuttle::timetable::get_shuttle_timetable)
+                    .service(rest::shuttle::timetable::get_shuttle_arrival)
             )
         })
         .bind(("127.0.0.1", 8080))?
