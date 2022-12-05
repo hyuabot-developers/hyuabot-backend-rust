@@ -1,5 +1,5 @@
 use serde::Serialize;
-use crate::model::shuttle::route_stop::ShuttleRouteStopItem;
+use crate::model::shuttle::route_stop::{ShuttleRouteStopItem, ShuttleRouteStopItemWithDescription};
 use crate::model::shuttle::stop::ShuttleStopItem;
 
 #[derive(Serialize)]
@@ -32,7 +32,15 @@ pub struct ShuttleStopLocationResponse {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleRouteStopResponse {
-    pub route_name: String,
+    pub name: String,
+    pub description: ShuttleRouteDescriptionResponse,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShuttleRouteDescriptionResponse {
+    pub korean: String,
+    pub english: String,
 }
 
 impl ShuttleStopListResponse {
@@ -53,7 +61,7 @@ impl ShuttleStopListItemResponse {
 }
 
 impl ShuttleStopItemResponse {
-    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItem>) -> Self {
+    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>) -> Self {
         let mut route_list = Vec::new();
         let _ = routes.iter()
             .map(|route| {
@@ -82,9 +90,15 @@ impl ShuttleStopLocationResponse {
 }
 
 impl ShuttleRouteStopResponse {
-    pub fn new(route: &ShuttleRouteStopItem) -> Self {
+    pub fn new(route: &ShuttleRouteStopItemWithDescription) -> Self {
+        let description_korean = route.description_korean.clone().unwrap_or("".to_string());
+        let description_english = route.description_english.clone().unwrap_or("".to_string());
         ShuttleRouteStopResponse {
-            route_name: route.route_name.clone(),
+            name: route.route_name.clone(),
+            description: ShuttleRouteDescriptionResponse{
+                korean: description_korean,
+                english: description_english,
+            }
         }
     }
 }
