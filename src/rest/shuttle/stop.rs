@@ -36,6 +36,6 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>) -> Result<HttpRe
     let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(stop_id.borrow())?;
     // let timetable = ShuttleTimeTableItem::get_timetable_by_route_name(route_id.borrow(), &period.period_type)?;
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
-        stop, &route_list
+        stop, &route_list, &period, &(weekday == "weekdays")
     )))
 }

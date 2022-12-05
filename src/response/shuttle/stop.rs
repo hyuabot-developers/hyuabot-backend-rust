@@ -1,6 +1,9 @@
+use chrono::Duration;
 use serde::Serialize;
+use crate::model::shuttle::period::ShuttlePeriodItem;
 use crate::model::shuttle::route_stop::{ShuttleRouteStopItem, ShuttleRouteStopItemWithDescription};
 use crate::model::shuttle::stop::ShuttleStopItem;
+use crate::model::shuttle::timetable::ShuttleTimeTableByShuttleStopItem;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,6 +37,7 @@ pub struct ShuttleStopLocationResponse {
 pub struct ShuttleRouteStopResponse {
     pub name: String,
     pub description: ShuttleRouteDescriptionResponse,
+    pub timetable: Vec<String>
 }
 
 #[derive(Serialize)]
@@ -61,13 +65,17 @@ impl ShuttleStopListItemResponse {
 }
 
 impl ShuttleStopItemResponse {
-    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>) -> Self {
+    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>, period: &ShuttlePeriodItem, weekday: &bool) -> Self {
         let mut route_list = Vec::new();
+        let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_stop_name(
+            &period.period_type, weekday, routes,
+        ).unwrap();
         let _ = routes.iter()
             .map(|route| {
-                route_list.push(ShuttleRouteStopResponse::new(route));
+                route_list.push(ShuttleRouteStopResponse::new(route, &timetable.iter().filter(
+                    |item| item.route_name == route.route_name
+                ).collect::<Vec<&ShuttleTimeTableByShuttleStopItem>>()));
             }).collect::<Vec<()>>();
-
         ShuttleStopItemResponse {
             stop_name: stop_item.stop_name,
             location: ShuttleStopLocationResponse::new(stop_item.latitude, stop_item.longitude),
@@ -90,7 +98,7 @@ impl ShuttleStopLocationResponse {
 }
 
 impl ShuttleRouteStopResponse {
-    pub fn new(route: &ShuttleRouteStopItemWithDescription) -> Self {
+    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>) -> Self {
         let description_korean = route.description_korean.clone().unwrap_or("".to_string());
         let description_english = route.description_english.clone().unwrap_or("".to_string());
         ShuttleRouteStopResponse {
@@ -98,7 +106,10 @@ impl ShuttleRouteStopResponse {
             description: ShuttleRouteDescriptionResponse{
                 korean: description_korean,
                 english: description_english,
-            }
+            },
+            timetable: timetable_list.iter().map(
+                |item| (item.departure_time.clone() + Duration::minutes(route.cumulative_time.unwrap() as i64)).to_string()
+            ).collect(),
         }
     }
 }

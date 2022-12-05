@@ -1,7 +1,8 @@
-use chrono::NaiveTime;
+use chrono::{Duration, NaiveTime};
 use diesel::prelude::*;
 
 use crate::db::connection;
+use crate::model::shuttle::route_stop::ShuttleRouteStopItemWithDescription;
 use crate::schema::shuttle_timetable::dsl::*;
 
 
@@ -19,6 +20,14 @@ pub struct ShuttleTimeTableItem {
     pub start_stop: String,
 }
 
+#[derive(Queryable)]
+pub struct ShuttleTimeTableByShuttleStopItem {
+    #[diesel(sql_type = Text)]
+    pub route_name: String,
+    #[diesel(sql_type = Time)]
+    pub departure_time: NaiveTime,
+}
+
 impl ShuttleTimeTableItem {
     pub fn get_timetable_by_route_name(route_name_query: &str, period_query: &str) -> Result<Vec<ShuttleTimeTableItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
@@ -27,6 +36,24 @@ impl ShuttleTimeTableItem {
             .filter(period_type.eq(period_query))
             .order(departure_time.asc())
             .load::<ShuttleTimeTableItem>(&mut conn)?;
+        Ok(timetable)
+    }
+}
+
+impl ShuttleTimeTableByShuttleStopItem {
+    pub fn get_timetable_by_stop_name(period_query: &str, weekday_query: &bool, route_list: &Vec<ShuttleRouteStopItemWithDescription>) -> Result<Vec<ShuttleTimeTableByShuttleStopItem>, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let mut timetable = Vec::new();
+        for route in route_list {
+            let mut timetable_by_route = shuttle_timetable
+                .select((route_name, departure_time))
+                .filter(route_name.eq(&route.route_name))
+                .filter(period_type.eq(period_query))
+                .filter(weekday.eq(weekday_query))
+                .order(departure_time.asc())
+                .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
+            timetable.append(&mut timetable_by_route);
+        }
         Ok(timetable)
     }
 }
