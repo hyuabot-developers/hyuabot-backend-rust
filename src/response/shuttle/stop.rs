@@ -1,4 +1,5 @@
 use chrono::Duration;
+use diesel::dsl::count;
 use serde::Serialize;
 use crate::model::shuttle::period::ShuttlePeriodItem;
 use crate::model::shuttle::route_stop::{ShuttleRouteStopItem, ShuttleRouteStopItemWithDescription};
@@ -65,16 +66,16 @@ impl ShuttleStopListItemResponse {
 }
 
 impl ShuttleStopItemResponse {
-    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>, period: &ShuttlePeriodItem, weekday: &bool) -> Self {
+    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>, period: &ShuttlePeriodItem, weekday: &bool, limit: &i64) -> Self {
         let mut route_list = Vec::new();
         let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_stop_name(
-            &period.period_type, weekday, routes,
+            &period.period_type, weekday, routes, limit
         ).unwrap();
         let _ = routes.iter()
             .map(|route| {
                 route_list.push(ShuttleRouteStopResponse::new(route, &timetable.iter().filter(
                     |item| item.route_name == route.route_name
-                ).collect::<Vec<&ShuttleTimeTableByShuttleStopItem>>()));
+                ).collect::<Vec<&ShuttleTimeTableByShuttleStopItem>>(), limit));
             }).collect::<Vec<()>>();
         ShuttleStopItemResponse {
             stop_name: stop_item.stop_name,
@@ -98,7 +99,7 @@ impl ShuttleStopLocationResponse {
 }
 
 impl ShuttleRouteStopResponse {
-    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>) -> Self {
+    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>, limit: &i64) -> Self {
         let description_korean = route.description_korean.clone().unwrap_or("".to_string());
         let description_english = route.description_english.clone().unwrap_or("".to_string());
         ShuttleRouteStopResponse {

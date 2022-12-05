@@ -1,12 +1,13 @@
 use std::borrow::Borrow;
 use actix_web::{get, web};
 use actix_web::HttpResponse;
+use actix_web::web::Query;
 use chrono::Datelike;
 use crate::error_handler::CustomError;
 use crate::model::shuttle::period::{ShuttleHolidayItem, ShuttlePeriodItem};
 use crate::model::shuttle::route_stop::ShuttleRouteStopItem;
 use crate::model::shuttle::stop::ShuttleStopItem;
-use crate::request::shuttle::stop::ShuttleStopNameQuery;
+use crate::request::shuttle::stop::{ShuttleStopItemQuery, ShuttleStopNameQuery};
 use crate::response::shuttle::stop::{ShuttleStopItemResponse, ShuttleStopListResponse};
 
 #[get("/shuttle/stop")]
@@ -19,7 +20,7 @@ pub async fn get_shuttle_stop(stop_query: web::Query<ShuttleStopNameQuery>) -> R
 }
 
 #[get("/shuttle/stop/{stop_id}")]
-pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>) -> Result<HttpResponse, CustomError> {
+pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let stop_id = stop_id.into_inner();
     let stop = ShuttleStopItem::get_one_by_name(stop_id.borrow())?;
     let period = ShuttlePeriodItem::get_current_period()?;
@@ -34,8 +35,8 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>) -> Result<HttpRe
         }
     };
     let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(stop_id.borrow())?;
-    // let timetable = ShuttleTimeTableItem::get_timetable_by_route_name(route_id.borrow(), &period.period_type)?;
+    let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
-        stop, &route_list, &period, &(weekday == "weekdays")
+        stop, &route_list, &period, &(weekday == "weekdays"), &limit
     )))
 }
