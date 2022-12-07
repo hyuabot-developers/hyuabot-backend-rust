@@ -1,4 +1,5 @@
-use actix_web::{App, HttpServer, web};
+use actix_web::{App, HttpServer};
+use actix_web::web::scope;
 
 mod db;
 mod error_handler;
@@ -13,17 +14,24 @@ async fn main() -> std::io::Result<()> {
     db::init();
     HttpServer::new(|| {
             App::new().service(
-                web::scope("/rest")
-                    .service(rest::shuttle::routes::get_shuttle_route)
-                    .service(rest::shuttle::routes::get_shuttle_route_by_id)
-                    .service(rest::shuttle::routes::get_shuttle_location_by_id)
-                    .service(rest::shuttle::stop::get_shuttle_stop)
-                    .service(rest::shuttle::stop::get_shuttle_stop_by_id)
-                    .service(rest::shuttle::stop::get_shuttle_route_stop_item)
-                    .service(rest::shuttle::stop::get_shuttle_route_stop_timetable_item)
-                    .service(rest::shuttle::stop::get_shuttle_route_stop_arrival_item)
+                scope("/rest").service(
+                    scope("/shuttle").service(
+                        scope("/route")
+                            .service(rest::shuttle::routes::get_shuttle_route)
+                            .service(rest::shuttle::routes::get_shuttle_route_by_id)
+                            .service(rest::shuttle::routes::get_shuttle_location_by_id)
+                    ).service(
+                        scope("/stop")
+                            .service(rest::shuttle::stop::get_shuttle_stop)
+                            .service(rest::shuttle::stop::get_shuttle_stop_by_id)
+                            .service(rest::shuttle::stop::get_shuttle_route_stop_item)
+                            .service(rest::shuttle::stop::get_shuttle_route_stop_timetable_item)
+                            .service(rest::shuttle::stop::get_shuttle_route_stop_arrival_item)
+                    )
                     .service(rest::shuttle::timetable::get_shuttle_timetable)
                     .service(rest::shuttle::timetable::get_shuttle_arrival)
+                )
+
             )
         })
         .bind(("127.0.0.1", 8080))?

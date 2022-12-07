@@ -20,7 +20,7 @@ pub async fn get_shuttle_stop(stop_query: web::Query<ShuttleStopNameQuery>) -> R
     Ok(HttpResponse::Ok().json(ShuttleStopListResponse::new(stop_list)))
 }
 
-#[get("/shuttle/stop/{stop_id}")]
+#[get("/{stop_id}")]
 pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let stop_id = stop_id.into_inner();
     let stop = ShuttleStopItem::get_one_by_name(stop_id.borrow())?;
@@ -42,7 +42,7 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query:
     )))
 }
 
-#[get("/shuttle/stop/{stop_id}/route/{route_id}")]
+#[get("/{stop_id}/route/{route_id}")]
 pub async fn get_shuttle_route_stop_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
@@ -66,7 +66,7 @@ pub async fn get_shuttle_route_stop_item(route_stop_query: web::Path<(String, St
     )))
 }
 
-#[get("/shuttle/stop/{stop_id}/route/{route_id}/timetable")]
+#[get("/{stop_id}/route/{route_id}/timetable")]
 pub async fn get_shuttle_route_stop_timetable_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
@@ -90,7 +90,7 @@ pub async fn get_shuttle_route_stop_timetable_item(route_stop_query: web::Path<(
     )))
 }
 
-#[get("/shuttle/stop/{stop_id}/route/{route_id}/arrival")]
+#[get("/{stop_id}/route/{route_id}/arrival")]
 pub async fn get_shuttle_route_stop_arrival_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;

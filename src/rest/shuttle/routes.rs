@@ -10,7 +10,7 @@ use crate::model::shuttle::timetable::ShuttleTimeTableItem;
 use crate::request::shuttle::route::ShuttleRouteNameQuery;
 use crate::response::shuttle::route::{ShuttleLocationResponse, ShuttleRouteListResponse, ShuttleRouteResponse};
 
-#[get("/shuttle/route")]
+#[get("/")]
 pub async fn get_shuttle_route(route_query: web::Query<ShuttleRouteNameQuery>) -> Result<HttpResponse, CustomError> {
     // check if route_name is provided in query parameter
     let routes = match route_query.route_name {
@@ -20,7 +20,7 @@ pub async fn get_shuttle_route(route_query: web::Query<ShuttleRouteNameQuery>) -
     Ok(HttpResponse::Ok().json(ShuttleRouteListResponse::new(routes)))
 }
 
-#[get("/shuttle/route/{route_id}")]
+#[get("/{route_id}")]
 pub async fn get_shuttle_route_by_id(route_id: web::Path<String>) -> Result<HttpResponse, CustomError> {
     let route_id = route_id.into_inner();
     let route = ShuttleRouteItem::get_one_by_name(route_id.borrow())?;
@@ -40,7 +40,7 @@ pub async fn get_shuttle_route_by_id(route_id: web::Path<String>) -> Result<Http
     Ok(HttpResponse::Ok().json(ShuttleRouteResponse::new(route, &weekday, &stop_list, &timetable)))
 }
 
-#[get("/shuttle/route/{route_id}/location")]
+#[get("/{route_id}/location")]
 pub async fn get_shuttle_location_by_id(route_id: web::Path<String>) -> Result<HttpResponse, CustomError> {
     let route_id = route_id.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
