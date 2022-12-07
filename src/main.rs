@@ -8,6 +8,7 @@ mod model;
 mod response;
 mod rest;
 mod request;
+mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

@@ -10,9 +10,10 @@ use crate::model::shuttle::stop::ShuttleStopItem;
 use crate::model::shuttle::timetable::ShuttleTimeTableByShuttleStopItem;
 use crate::request::shuttle::stop::{ShuttleStopItemQuery, ShuttleStopNameQuery};
 use crate::response::shuttle::stop::{ShuttleRouteStopArrivalResponse, ShuttleRouteStopResponse, ShuttleRouteStopTimetableResponse, ShuttleStopItemResponse, ShuttleStopListResponse};
+use crate::utils::shuttle::get_shuttle_weekday;
 
 #[get("/shuttle/stop")]
-pub async fn get_shuttle_stop(stop_query: web::Query<ShuttleStopNameQuery>) -> Result<HttpResponse, CustomError> {
+pub async fn get_shuttle_stop(stop_query: Query<ShuttleStopNameQuery>) -> Result<HttpResponse, CustomError> {
     let stop_list = match stop_query.stop_name {
         Some(ref route_name) => ShuttleStopItem::find_by_name(route_name)?,
         None => ShuttleStopItem::find_all()?,
@@ -25,16 +26,7 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query:
     let stop_id = stop_id.into_inner();
     let stop = ShuttleStopItem::get_one_by_name(stop_id.borrow())?;
     let period = ShuttlePeriodItem::get_current_period()?;
-    let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
-        Ok(holiday_item) => holiday_item.holiday_type,
-        Err(_) => {
-            if chrono::Local::now().weekday() == chrono::Weekday::Sat || chrono::Local::now().weekday() == chrono::Weekday::Sun {
-                "weekends".to_string()
-            } else {
-                "weekdays".to_string()
-            }
-        }
-    };
+    let weekday = get_shuttle_weekday();
     let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(stop_id.borrow())?;
     let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
@@ -46,16 +38,7 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query:
 pub async fn get_shuttle_route_stop_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
-    let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
-        Ok(holiday_item) => holiday_item.holiday_type,
-        Err(_) => {
-            if chrono::Local::now().weekday() == chrono::Weekday::Sat || chrono::Local::now().weekday() == chrono::Weekday::Sun {
-                "weekends".to_string()
-            } else {
-                "weekdays".to_string()
-            }
-        }
-    };
+    let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
     let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
@@ -70,16 +53,7 @@ pub async fn get_shuttle_route_stop_item(route_stop_query: web::Path<(String, St
 pub async fn get_shuttle_route_stop_timetable_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
-    let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
-        Ok(holiday_item) => holiday_item.holiday_type,
-        Err(_) => {
-            if chrono::Local::now().weekday() == chrono::Weekday::Sat || chrono::Local::now().weekday() == chrono::Weekday::Sun {
-                "weekends".to_string()
-            } else {
-                "weekdays".to_string()
-            }
-        }
-    };
+    let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
     let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
@@ -94,16 +68,7 @@ pub async fn get_shuttle_route_stop_timetable_item(route_stop_query: web::Path<(
 pub async fn get_shuttle_route_stop_arrival_item(route_stop_query: web::Path<(String, String)>, stop_item_query: Query<ShuttleStopItemQuery>) -> Result<HttpResponse, CustomError> {
     let query = route_stop_query.into_inner();
     let period = ShuttlePeriodItem::get_current_period()?;
-    let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
-        Ok(holiday_item) => holiday_item.holiday_type,
-        Err(_) => {
-            if chrono::Local::now().weekday() == chrono::Weekday::Sat || chrono::Local::now().weekday() == chrono::Weekday::Sun {
-                "weekends".to_string()
-            } else {
-                "weekdays".to_string()
-            }
-        }
-    };
+    let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
     let limit = stop_item_query.limit.unwrap_or_else(|| 999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
