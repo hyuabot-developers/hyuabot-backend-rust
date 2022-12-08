@@ -31,8 +31,12 @@ async fn main() -> std::io::Result<()> {
                     )
                     .service(rest::shuttle::timetable::get_shuttle_timetable)
                     .service(rest::shuttle::timetable::get_shuttle_arrival)
+                ).service(
+                    scope("/bus").service(
+                        scope("/stop")
+                            .service(rest::bus::stop::get_bus_stop_list)
+                    )
                 )
-
             )
         })
         .bind(("127.0.0.1", 8080))?
