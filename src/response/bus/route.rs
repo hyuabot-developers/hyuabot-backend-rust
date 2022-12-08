@@ -2,6 +2,7 @@ use chrono::NaiveTime;
 use serde::Serialize;
 use crate::model::bus::route::BusRouteItem;
 use crate::model::bus::stop::BusStopItem;
+use crate::model::bus::timetable::BusTimetableItem;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -63,6 +64,14 @@ pub struct BusRouteType {
 pub struct BusRouteStop {
     pub id: i32,
     pub name: String
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BusTimetableListResponse {
+    pub weekdays: Vec<String>,
+    pub saturday: Vec<String>,
+    pub sunday: Vec<String>,
 }
 
 impl BusRouteListResponse {
@@ -147,6 +156,22 @@ impl BusRouteStop {
         BusRouteStop {
             id: stop_item.stop_id,
             name: stop_item.stop_name.unwrap()
+        }
+    }
+}
+
+impl BusTimetableListResponse {
+    pub fn new(timetable: Vec<BusTimetableItem>) -> Self {
+        BusTimetableListResponse {
+            weekdays: timetable.iter()
+                .filter(|item| item.weekday == "weekdays")
+                .map(|item| item.departure_time.to_string()).collect(),
+            saturday: timetable.iter()
+                .filter(|item| item.weekday == "saturday")
+                .map(|item| item.departure_time.to_string()).collect(),
+            sunday: timetable.iter()
+                .filter(|item| item.weekday == "sunday")
+                .map(|item| item.departure_time.to_string()).collect()
         }
     }
 }
