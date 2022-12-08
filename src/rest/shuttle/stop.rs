@@ -11,7 +11,7 @@ use crate::request::shuttle::stop::{ShuttleStopItemQuery, ShuttleStopNameQuery};
 use crate::response::shuttle::stop::{ShuttleRouteStopArrivalResponse, ShuttleRouteStopResponse, ShuttleRouteStopTimetableResponse, ShuttleStopItemResponse, ShuttleStopListResponse};
 use crate::utils::shuttle::get_shuttle_weekday;
 
-#[get("/shuttle/stop")]
+#[get("")]
 pub async fn get_shuttle_stop(stop_query: Query<ShuttleStopNameQuery>) -> Result<HttpResponse, CustomError> {
     let stop_list = match stop_query.stop_name {
         Some(ref route_name) => ShuttleStopItem::find_by_name(route_name)?,

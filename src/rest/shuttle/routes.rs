@@ -10,7 +10,7 @@ use crate::request::shuttle::route::ShuttleRouteNameQuery;
 use crate::response::shuttle::route::{ShuttleLocationResponse, ShuttleRouteListResponse, ShuttleRouteResponse};
 use crate::utils::shuttle::get_shuttle_weekday;
 
-#[get("/")]
+#[get("")]
 pub async fn get_shuttle_route(route_query: web::Query<ShuttleRouteNameQuery>) -> Result<HttpResponse, CustomError> {
     // check if route_name is provided in query parameter
     let routes = match route_query.route_name {
