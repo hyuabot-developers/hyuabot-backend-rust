@@ -1,6 +1,5 @@
 use chrono::NaiveTime;
 use diesel::prelude::*;
-use serde::Serialize;
 
 use crate::db::connection;
 use crate::schema::bus_route::dsl::*;
@@ -51,6 +50,14 @@ impl BusRouteItem {
         let route = bus_route
             .filter(route_name.like(format!("%{}%", route_name_query)))
             .load::<Self>(&mut conn)?;
+        Ok(route)
+    }
+
+    pub fn get_by_id(route_id_query: &i32) -> Result<Self, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let route = bus_route
+            .filter(route_id.eq(route_id_query))
+            .first::<Self>(&mut conn)?;
         Ok(route)
     }
 }
