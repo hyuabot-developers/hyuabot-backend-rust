@@ -39,10 +39,10 @@ impl BusStopItem {
         Ok(stops)
     }
 
-    pub fn get_one_by_id(stop_id_query: &str) -> Result<BusStopItem, diesel::result::Error> {
+    pub fn get_one_by_id(stop_id_query: &i32) -> Result<BusStopItem, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let stop = bus_stop
-            .filter(stop_name.eq(stop_id_query))
+            .filter(stop_id.eq(stop_id_query))
             .first::<BusStopItem>(&mut conn)?;
         Ok(stop)
     }

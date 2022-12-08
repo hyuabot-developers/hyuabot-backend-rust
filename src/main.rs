@@ -35,6 +35,7 @@ async fn main() -> std::io::Result<()> {
                     scope("/bus").service(
                         scope("/stop")
                             .service(rest::bus::stop::get_bus_stop_list)
+                            .service(rest::bus::stop::get_bus_stop_by_id)
                     )
                 )
             )

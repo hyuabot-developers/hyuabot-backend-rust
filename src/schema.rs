@@ -9,6 +9,7 @@ diesel::table! {
         remaining_seat_count -> Int4,
         remaining_time -> Int4,
         low_plate -> Bool,
+        last_updated_time -> Timestamp,
     }
 }
 
@@ -36,6 +37,7 @@ diesel::table! {
         route_id -> Int4,
         stop_id -> Int4,
         stop_sequence -> Int4,
+        start_stop_id -> Int4,
     }
 }
 
@@ -234,6 +236,7 @@ diesel::table! {
 }
 
 diesel::joinable!(bus_route_stop -> bus_stop (stop_id));
+diesel::joinable!(bus_route_stop -> bus_route (route_id));
 diesel::joinable!(commute_shuttle_timetable -> commute_shuttle_route (route_name));
 diesel::joinable!(commute_shuttle_timetable -> commute_shuttle_stop (stop_name));
 diesel::joinable!(menu -> restaurant (restaurant_id));
