@@ -48,6 +48,7 @@ async fn main() -> std::io::Result<()> {
                             .service(rest::subway::station::get_subway_station_list)
                             .service(rest::subway::station::get_subway_station_by_id)
                             .service(rest::subway::station::get_subway_arrival_by_station)
+                            .service(rest::subway::station::get_subway_timetable_by_station)
                     )
                 )
             )

@@ -5,7 +5,7 @@ use actix_web::web::Query;
 use crate::error_handler::CustomError;
 use crate::model::subway::station::SubwayStationItem;
 use crate::request::subway::station::SubwayStationQuery;
-use crate::response::subway::station::SubwayStationItemResponse;
+use crate::response::subway::station::{SubwayStationItemResponse, SubwayStationTimetableResponse};
 use crate::response::subway::station::SubwayStationArrivalResponse;
 use crate::response::subway::station::SubwayStationListResponse;
 
@@ -27,4 +27,9 @@ pub async fn get_subway_station_by_id(station_id: Path<String>) -> Result<HttpRe
 #[get("/{station_id}/arrival")]
 pub async fn get_subway_arrival_by_station(station_id: Path<String>) -> Result<HttpResponse, CustomError> {
     Ok(HttpResponse::Ok().json(SubwayStationArrivalResponse::new(&station_id)))
+}
+
+#[get("/{station_id}/timetable")]
+pub async fn get_subway_timetable_by_station(station_id: Path<String>) -> Result<HttpResponse, CustomError> {
+    Ok(HttpResponse::Ok().json(SubwayStationTimetableResponse::new(&station_id)))
 }

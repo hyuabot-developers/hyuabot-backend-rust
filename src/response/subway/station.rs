@@ -80,6 +80,20 @@ pub struct SubwayStationTimetableArrivalItem {
     pub time: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationTimetableResponse {
+    pub up: SubwayStationTimetableHeading,
+    pub down: SubwayStationTimetableHeading,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationTimetableHeading {
+    pub weekdays: Vec<SubwayStationTimetableArrivalItem>,
+    pub weekends: Vec<SubwayStationTimetableArrivalItem>,
+}
+
 impl SubwayStationListResponse {
     pub fn new(station_list: Vec<SubwayStationItem>) -> Self {
         Self {
@@ -241,6 +255,28 @@ impl SubwayStationTimetableArrivalItem {
         Self {
             destination: timetable_item.terminal_station_name.clone(),
             time: timetable_item.departure_time.format("%H:%M").to_string(),
+        }
+    }
+}
+
+impl SubwayStationTimetableResponse {
+    pub fn new(station_id: &str) -> Self {
+        Self {
+            up: SubwayStationTimetableHeading::new(station_id, &"up"),
+            down: SubwayStationTimetableHeading::new(station_id, &"down"),
+        }
+    }
+}
+
+impl SubwayStationTimetableHeading {
+    pub fn new(station_id: &str, heading: &str) -> Self {
+        Self {
+            weekdays: SubwayTimetableItem::get_train_by_heading(&station_id, &"weekdays", heading)
+                .unwrap().into_iter()
+                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
+            weekends: SubwayTimetableItem::get_train_by_heading(&station_id, &"weekends", heading)
+                .unwrap().into_iter()
+                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
         }
     }
 }
