@@ -54,6 +54,9 @@ async fn main() -> std::io::Result<()> {
                     scope("/library")
                         .service(rest::library::room::get_room_list_by_campus_id)
                         .service(rest::library::room::get_room_by_room_id)
+                ).service(
+                    scope("/cafeteria")
+                        .service(rest::cafeteria::restaurant::get_restaurant_list_by_campus_id)
                 )
             )
         })
