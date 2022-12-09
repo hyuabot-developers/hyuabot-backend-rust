@@ -34,4 +34,12 @@ impl SubwayStationItem {
             .load::<SubwayStationItem>(&mut conn)?;
         Ok(station_list)
     }
+
+    pub fn get_by_id(station_id_query: &str) -> Result<SubwayStationItem, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let station = subway_route_station
+            .filter(station_id.eq(station_id_query))
+            .first::<SubwayStationItem>(&mut conn)?;
+        Ok(station)
+    }
 }
