@@ -50,6 +50,10 @@ async fn main() -> std::io::Result<()> {
                             .service(rest::subway::station::get_subway_arrival_by_station)
                             .service(rest::subway::station::get_subway_timetable_by_station)
                     )
+                ).service(
+                    scope("/library")
+                        .service(rest::library::room::get_room_list_by_campus_id)
+                        .service(rest::library::room::get_room_by_room_id)
                 )
             )
         })
