@@ -1,5 +1,6 @@
-use chrono::NaiveTime;
+use chrono::{Local, NaiveTime};
 use serde::Serialize;
+use crate::model::subway::realtime::SubwayRealtimeItem;
 use crate::model::subway::station::SubwayStationItem;
 use crate::model::subway::timetable::SubwayTimetableItem;
 use crate::utils::subway::get_subway_weekday;
@@ -47,6 +48,35 @@ pub struct SubwayStationItemFirstLastTime {
 #[serde(rename_all = "camelCase")]
 pub struct SubwayTimeItem {
     pub terminal_station: String,
+    pub time: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationArrivalResponse {
+    pub up: SubwayStationArrivalHeading,
+    pub down: SubwayStationArrivalHeading,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationArrivalHeading {
+    pub realtime: Vec<SubwayStationRealtimeArrivalItem>,
+    pub timetable: Vec<SubwayStationTimetableArrivalItem>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationRealtimeArrivalItem {
+    pub destination: String,
+    pub current: String,
+    pub time: i32,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SubwayStationTimetableArrivalItem {
+    pub destination: String,
     pub time: String,
 }
 
@@ -171,6 +201,59 @@ impl SubwayTimeItem {
         Self {
             terminal_station,
             time: time_item.departure_time.format("%H:%M").to_string(),
+        }
+    }
+}
+
+impl SubwayStationArrivalResponse {
+    pub fn new(station_id: &str) -> Self {
+        Self {
+            up: SubwayStationArrivalHeading::new(
+                &SubwayRealtimeItem::find_by_station(&station_id, &"up").unwrap(),
+                &SubwayTimetableItem::get_train_by_heading(&station_id, &get_subway_weekday(), &"up").unwrap()
+            ),
+            down: SubwayStationArrivalHeading::new(
+                &SubwayRealtimeItem::find_by_station(&station_id, &"down").unwrap(),
+                &SubwayTimetableItem::get_train_by_heading(&station_id, &get_subway_weekday(), &"down").unwrap()
+            ),
+        }
+    }
+}
+
+impl SubwayStationArrivalHeading {
+    pub fn new(
+        realtime_arrival_list: &Vec<SubwayRealtimeItem>,
+        timetable_list: &Vec<SubwayTimetableItem>,
+    ) -> Self {
+        let now = Local::now();
+        let last_realtime_item = realtime_arrival_list.last().unwrap();
+        Self {
+            realtime: realtime_arrival_list.into_iter()
+                .map(|realtime_item| SubwayStationRealtimeArrivalItem::new(realtime_item)).collect(),
+            timetable: timetable_list.into_iter()
+                .filter(|timetable_item| {
+                    (timetable_item.departure_time - now.time()).num_minutes() > last_realtime_item.remaining_time as i64 - (now.naive_local() - last_realtime_item.last_updated_time).num_minutes() + 2
+                })
+                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(timetable_item)).collect(),
+        }
+    }
+}
+
+impl SubwayStationRealtimeArrivalItem {
+    pub fn new(realtime_item: &SubwayRealtimeItem) -> Self {
+        Self {
+            destination: SubwayStationItem::get_by_id(realtime_item.terminal_station_id.as_str()).unwrap().station_name,
+            current: realtime_item.current_station_name.clone(),
+            time: realtime_item.remaining_time,
+        }
+    }
+}
+
+impl SubwayStationTimetableArrivalItem {
+    pub fn new(timetable_item: &SubwayTimetableItem) -> Self {
+        Self {
+            destination: SubwayStationItem::get_by_id(timetable_item.terminal_station_id.as_str()).unwrap().station_name,
+            time: timetable_item.departure_time.format("%H:%M").to_string(),
         }
     }
 }
