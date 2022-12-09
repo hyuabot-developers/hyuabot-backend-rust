@@ -3,6 +3,8 @@ use diesel::prelude::*;
 
 use crate::db::connection;
 use crate::schema::subway_realtime::dsl::*;
+use crate::schema::subway_realtime::dsl as subway_realtime_table;
+use crate::schema::subway_route_station::dsl::*;
 
 #[derive(Queryable)]
 pub struct SubwayRealtimeItem {
@@ -19,7 +21,7 @@ pub struct SubwayRealtimeItem {
     #[diesel(sql_type = Text)]
     pub up_down_type: String,
     #[diesel(sql_type = Text)]
-    pub terminal_station_id: String,
+    pub terminal_station_name: String,
     #[diesel(sql_type = Text)]
     pub train_number: String,
     #[diesel(sql_type = Timestamp)]
@@ -36,7 +38,22 @@ impl SubwayRealtimeItem {
     pub fn find_by_station(station_id_query: &str, heading: &str) -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let route = subway_realtime
-            .filter(station_id.eq(station_id_query))
+            .inner_join(subway_route_station)
+            .select((
+                subway_realtime_table::station_id,
+                arrival_sequence,
+                current_station_name,
+                remaining_stop_count,
+                remaining_time,
+                up_down_type,
+                station_name,
+                train_number,
+                last_updated_time,
+                is_express_train,
+                is_last_train,
+                status_code,
+            ))
+            .filter(subway_realtime_table::station_id.eq(station_id_query))
             .filter(up_down_type.eq((heading == "up").to_string()))
             .order(remaining_time.asc())
             .load::<Self>(&mut conn)?;

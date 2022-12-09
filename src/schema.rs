@@ -244,6 +244,8 @@ diesel::joinable!(shuttle_route_stop -> shuttle_route (route_name));
 diesel::joinable!(shuttle_route_stop -> shuttle_stop (stop_name));
 diesel::joinable!(shuttle_timetable -> shuttle_route (route_name));
 diesel::joinable!(shuttle_timetable -> shuttle_stop (start_stop));
+diesel::joinable!(subway_timetable -> subway_route_station (terminal_station_id));
+diesel::joinable!(subway_realtime -> subway_route_station (terminal_station_id));
 
 diesel::allow_tables_to_appear_in_same_query!(
     bus_realtime,

@@ -105,7 +105,7 @@ impl SubwayStationItemResponse {
                 |_| {
                     SubwayTimetableItem {
                         station_id: String::from(""),
-                        terminal_station_id: String::from(""),
+                        terminal_station_name: String::from(""),
                         departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
                         weekday: String::from(""),
                         up_down_type: String::from(""),
@@ -117,7 +117,7 @@ impl SubwayStationItemResponse {
                 |_| {
                     SubwayTimetableItem {
                         station_id: String::from(""),
-                        terminal_station_id: String::from(""),
+                        terminal_station_name: String::from(""),
                         departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
                         weekday: String::from(""),
                         up_down_type: String::from(""),
@@ -129,7 +129,7 @@ impl SubwayStationItemResponse {
                 |_| {
                     SubwayTimetableItem {
                         station_id: String::from(""),
-                        terminal_station_id: String::from(""),
+                        terminal_station_name: String::from(""),
                         departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
                         weekday: String::from(""),
                         up_down_type: String::from(""),
@@ -141,7 +141,7 @@ impl SubwayStationItemResponse {
                 |_| {
                     SubwayTimetableItem {
                         station_id: String::from(""),
-                        terminal_station_id: String::from(""),
+                        terminal_station_name: String::from(""),
                         departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
                         weekday: String::from(""),
                         up_down_type: String::from(""),
@@ -185,21 +185,8 @@ impl SubwayStationItemFirstLastTime {
 
 impl SubwayTimeItem {
     pub fn new(time_item: SubwayTimetableItem) -> Self {
-        let terminal_station = SubwayStationItem::get_by_id(&time_item.terminal_station_id)
-            .unwrap_or_else(
-                |_| {
-                    SubwayStationItem {
-                        station_id: String::from(""),
-                        route_id: 0,
-                        station_name: String::from(""),
-                        station_sequence: 0,
-                        cumulative_time: 0.0,
-                    }
-                }
-            )
-            .station_name;
         Self {
-            terminal_station,
+            terminal_station: time_item.terminal_station_name,
             time: time_item.departure_time.format("%H:%M").to_string(),
         }
     }
@@ -242,7 +229,7 @@ impl SubwayStationArrivalHeading {
 impl SubwayStationRealtimeArrivalItem {
     pub fn new(realtime_item: &SubwayRealtimeItem) -> Self {
         Self {
-            destination: SubwayStationItem::get_by_id(realtime_item.terminal_station_id.as_str()).unwrap().station_name,
+            destination: realtime_item.terminal_station_name.clone(),
             current: realtime_item.current_station_name.clone(),
             time: realtime_item.remaining_time,
         }
@@ -252,7 +239,7 @@ impl SubwayStationRealtimeArrivalItem {
 impl SubwayStationTimetableArrivalItem {
     pub fn new(timetable_item: &SubwayTimetableItem) -> Self {
         Self {
-            destination: SubwayStationItem::get_by_id(timetable_item.terminal_station_id.as_str()).unwrap().station_name,
+            destination: timetable_item.terminal_station_name.clone(),
             time: timetable_item.departure_time.format("%H:%M").to_string(),
         }
     }
