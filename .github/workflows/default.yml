@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v3
       - name: Update local toolchain
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
           rustup update
           rustup component add clippy
           rustup install nightly          
@@ -25,4 +26,4 @@ jobs:
         run: |
           cd phaser
           cargo fmt -- --check
-          cargo clippy -- -D warnings  
+          cargo clippy -- -D warnings
