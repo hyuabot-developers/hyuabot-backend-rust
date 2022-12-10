@@ -7,14 +7,15 @@ use crate::model::shuttle::timetable::ShuttleTimeTableItem;
 
 #[derive(Serialize)]
 pub struct ShuttleRouteListResponse {
-    pub routes: Vec<ShuttleRouteItem>,
+    pub routes: Vec<ShuttleRouteListItem>,
 }
 
-impl ShuttleRouteListResponse {
-    pub fn new(routes: Vec<ShuttleRouteItem>) -> Self {
-        ShuttleRouteListResponse { routes }
-    }
+#[derive(Serialize)]
+pub struct ShuttleRouteListItem {
+    pub name: String,
+    pub description: ShuttleDescriptionItem,
 }
+
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -54,6 +55,27 @@ pub struct ShuttleLocationResponse {
 #[derive(Serialize)]
 pub struct ShuttleLocationItem {
     pub location: f32,
+}
+
+
+impl ShuttleRouteListResponse {
+    pub fn new(routes: Vec<ShuttleRouteItem>) -> Self {
+        ShuttleRouteListResponse {
+            routes: routes.into_iter().map(|route| ShuttleRouteListItem::new(route)).collect()
+        }
+    }
+}
+
+impl ShuttleRouteListItem {
+    pub fn new(route: ShuttleRouteItem) -> Self {
+        ShuttleRouteListItem {
+            name: route.route_name,
+            description: ShuttleDescriptionItem {
+                korean: route.description_korean.unwrap_or_else(|| "".to_string()),
+                english: route.description_english.unwrap_or_else(|| "".to_string()),
+            }
+        }
+    }
 }
 
 impl ShuttleRouteResponse {
