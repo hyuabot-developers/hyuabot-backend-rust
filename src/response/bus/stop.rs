@@ -8,22 +8,22 @@ use crate::model::bus::timetable::BusTimetableItem;
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BusStopListResponse {
-    pub stop_list: Vec<BusStopListItem>,
+    pub stop: Vec<BusStopListItem>,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BusStopListItem {
-    pub stop_id: i32,
-    pub stop_name: String,
+    pub id: i32,
+    pub name: String,
     pub location: BusStopLocation,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BusStopItemResponse {
-    pub stop_id: i32,
-    pub stop_name: String,
+    pub id: i32,
+    pub name: String,
     pub district_code: i32,
     pub mobile_number: String,
     pub region_name: String,
@@ -40,8 +40,8 @@ pub struct BusStopLocation {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BusViaRouteItem {
-    route_id: i32,
-    route_name: String,
+    id: i32,
+    name: String,
     sequence: i32,
     realtime: Vec<BusViaRouteRealtimeItem>,
     timetable: BusViaRouteTimetableList,
@@ -65,14 +65,14 @@ pub struct BusViaRouteTimetableList {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BusViaRouteTimetableStartStop {
-    stop_name: String,
-    stop_id: i32,
+    name: String,
+    id: i32,
 }
 
 impl BusStopListResponse {
     pub fn new(stop_list: Vec<BusStopItem>) -> Self {
         Self {
-            stop_list: stop_list.into_iter().map(|stop_item| BusStopListItem::new(stop_item)).collect()
+            stop: stop_list.into_iter().map(|stop_item| BusStopListItem::new(stop_item)).collect()
         }
     }
 }
@@ -80,8 +80,8 @@ impl BusStopListResponse {
 impl BusStopListItem {
     pub fn new(stop_item: BusStopItem) -> Self {
         Self {
-            stop_id: stop_item.stop_id,
-            stop_name: stop_item.stop_name.unwrap(),
+            id: stop_item.stop_id,
+            name: stop_item.stop_name.unwrap(),
             location: BusStopLocation::new(stop_item.latitude, stop_item.longitude),
         }
     }
@@ -100,8 +100,8 @@ impl BusStopItemResponse {
     pub fn new(stop_item: BusStopItem) -> Self {
         let via_route_list = BusRouteStopItem::find_by_stop_id(&stop_item.stop_id).unwrap();
         Self {
-            stop_id: stop_item.stop_id,
-            stop_name: stop_item.stop_name.unwrap(),
+            id: stop_item.stop_id,
+            name: stop_item.stop_name.unwrap(),
             district_code: stop_item.district_code,
             mobile_number: stop_item.mobile_number,
             region_name: stop_item.region_name,
@@ -116,8 +116,8 @@ impl BusViaRouteItem {
         let realtime_arrival_list = BusRealtimeItem::find_by_stop_and_route_id(&route_stop_item.route_id, &route_stop_item.stop_id).unwrap();
         let now = chrono::Local::now().naive_local();
         Self {
-            route_id: route_stop_item.route_id,
-            route_name: route_stop_item.route_name.clone(),
+            id: route_stop_item.route_id,
+            name: route_stop_item.route_name.clone(),
             sequence: route_stop_item.stop_sequence,
             realtime: realtime_arrival_list.into_iter()
                 .filter(|realtime_item| realtime_item.remaining_time as i64 - (now - realtime_item.last_updated_at).num_minutes() > 0)
@@ -151,8 +151,8 @@ impl BusViaRouteTimetableList {
 impl BusViaRouteTimetableStartStop {
     pub fn new(stop_item: BusStopItem) -> Self {
         Self {
-            stop_name: stop_item.stop_name.unwrap(),
-            stop_id: stop_item.stop_id,
+            name: stop_item.stop_name.unwrap(),
+            id: stop_item.stop_id,
         }
     }
 }
