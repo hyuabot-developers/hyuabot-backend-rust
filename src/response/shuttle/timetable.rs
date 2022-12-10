@@ -50,7 +50,7 @@ pub struct ShuttleArrivalRouteStopItem {
 }
 
 impl ShuttleTimetableListResponse {
-    pub fn new(stop_list: &Vec<ShuttleStopItem>) -> Self {
+    pub fn new(stop_list: &[ShuttleStopItem]) -> Self {
         let period = ShuttlePeriodItem::get_current_period().unwrap();
         let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
             Ok(holiday_item) => holiday_item.holiday_type,
@@ -74,7 +74,7 @@ impl ShuttleTimetableStopItem {
             .unwrap_or_else(|_| vec![]);
         ShuttleTimetableStopItem {
             name: stop.stop_name.clone(),
-            route_list: route_list.iter().map(| route| ShuttleTimetableRouteStopItem::new(&route, period, weekday)).collect()
+            route_list: route_list.iter().map(| route| ShuttleTimetableRouteStopItem::new(route, period, weekday)).collect()
         }
     }
 }
@@ -82,7 +82,7 @@ impl ShuttleTimetableStopItem {
 impl ShuttleTimetableRouteStopItem {
     pub fn new(route_stop: &ShuttleRouteStopItemWithDescription, period: &str, weekday: &bool) -> Self {
         let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
-            period, weekday, &route_stop, &999, &Option::from(true)
+            period, weekday, route_stop, &999, &Option::from(true)
         ).unwrap();
         ShuttleTimetableRouteStopItem {
             name: route_stop.route_name.clone(),
@@ -91,14 +91,14 @@ impl ShuttleTimetableRouteStopItem {
                 english: route_stop.description_english.clone().unwrap()
             },
             timetable: timetable.iter()
-                .map(|item| (item.departure_time.clone() + Duration::minutes(route_stop.cumulative_time.unwrap() as i64)).to_string())
+                .map(|item| (item.departure_time + Duration::minutes(route_stop.cumulative_time.unwrap() as i64)).to_string())
                 .collect()
         }
     }
 }
 
 impl ShuttleArrivalListResponse {
-    pub fn new(stop_list: &Vec<ShuttleStopItem>) -> Self {
+    pub fn new(stop_list: &[ShuttleStopItem]) -> Self {
         let period = ShuttlePeriodItem::get_current_period().unwrap();
         let weekday = match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
             Ok(holiday_item) => holiday_item.holiday_type,
@@ -122,7 +122,7 @@ impl ShuttleArrivalStopItem {
             .unwrap_or_else(|_| vec![]);
         ShuttleArrivalStopItem {
             name: stop.stop_name.clone(),
-            route_list: route_list.iter().map(| route| ShuttleArrivalRouteStopItem::new(&route, period, weekday)).collect()
+            route_list: route_list.iter().map(| route| ShuttleArrivalRouteStopItem::new(route, period, weekday)).collect()
         }
     }
 }
@@ -130,7 +130,7 @@ impl ShuttleArrivalStopItem {
 impl ShuttleArrivalRouteStopItem {
     pub fn new(route_stop: &ShuttleRouteStopItemWithDescription, period: &str, weekday: &bool) -> Self {
         let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
-            period, weekday, &route_stop, &999, &Option::from(false)
+            period, weekday, route_stop, &999, &Option::from(false)
         ).unwrap();
         let now = chrono::Local::now().naive_local().time();
         ShuttleArrivalRouteStopItem {
@@ -140,7 +140,7 @@ impl ShuttleArrivalRouteStopItem {
                 english: route_stop.description_english.clone().unwrap()
             },
             arrival: timetable.iter()
-                .map(|item| (item.departure_time.clone() + Duration::minutes(route_stop.cumulative_time.unwrap() as i64) - now).num_minutes())
+                .map(|item| (item.departure_time + Duration::minutes(route_stop.cumulative_time.unwrap() as i64) - now).num_minutes())
                 .collect()
         }
     }

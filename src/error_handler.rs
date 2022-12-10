@@ -27,7 +27,7 @@ impl fmt::Display for CustomError {
 impl From<DieselError> for CustomError {
     fn from(error: DieselError) -> Self {
         match error {
-            DieselError::DatabaseError(_, err) => CustomError::new(500, format!("Database Error: {}", err.message().to_string())),
+            DieselError::DatabaseError(_, err) => CustomError::new(500, format!("Database Error: {}", err.message())),
             DieselError::NotFound => CustomError::new(404, "Resource Not found".to_string()),
             _ => CustomError::new(500, "Internal Server Error".to_string()),
         }

@@ -22,6 +22,6 @@ pub async fn get_menu_list_by_campus_id(campus_id: Path<i32>, menu_query: Query<
             _ => "석식"
         }
     };
-    let menu_list = RestaurantMenuItem::find_by_campus_id_and_time(&campus_id, &feed_date, &time_type)?;
+    let menu_list = RestaurantMenuItem::find_by_campus_id_and_time(&campus_id, &feed_date, time_type)?;
     Ok(HttpResponse::Ok().json(RestaurantListResponse::new(menu_list)))
 }

@@ -36,7 +36,8 @@ impl SubwayTimetableItem {
                 .filter(departure_time.gt(NaiveTime::parse_from_str("04:00:00", "%H:%M:%S").unwrap()))
                 .order(departure_time.asc())
                 .limit(1)
-                .first::<SubwayTimetableItem>(&mut conn)?
+                .first::<SubwayTimetableItem>(&mut conn)
+                .unwrap()
         )
     }
 
@@ -97,7 +98,8 @@ impl SubwayTimetableItem {
                 .filter(weekday.eq(weekday_query))
                 .filter(up_down_type.eq(up_down_type_query))
                 .order(departure_time.asc())
-                .load::<SubwayTimetableItem>(&mut conn)?
+                .load::<SubwayTimetableItem>(&mut conn)
+                .unwrap()
         )
     }
 }

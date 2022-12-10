@@ -77,7 +77,7 @@ pub struct BusTimetableListResponse {
 impl BusRouteListResponse {
     pub fn new(route_list: Vec<BusRouteItem>) -> Self {
         BusRouteListResponse {
-            route_list: route_list.into_iter().map(|route_item| BusRouteListItem::new(route_item)).collect()
+            route_list: route_list.into_iter().map(BusRouteListItem::new).collect()
         }
     }
 }

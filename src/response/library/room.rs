@@ -23,7 +23,7 @@ impl ReadingRoomListResponse {
     pub fn new(rooms: Vec<ReadingRoomItem>) -> Self {
         let room_list = rooms
             .into_iter()
-            .map(|room| ReadingRoomItemResponse::new(room))
+            .map(ReadingRoomItemResponse::new)
             .collect();
         Self { room_list }
     }

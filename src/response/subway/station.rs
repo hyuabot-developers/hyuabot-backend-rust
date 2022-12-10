@@ -97,7 +97,7 @@ pub struct SubwayStationTimetableHeading {
 impl SubwayStationListResponse {
     pub fn new(station_list: Vec<SubwayStationItem>) -> Self {
         Self {
-            station_list: station_list.into_iter().map(|stop_item| SubwayStationListItem::new(stop_item)).collect()
+            station_list: station_list.into_iter().map(SubwayStationListItem::new).collect()
         }
     }
 }
@@ -210,12 +210,12 @@ impl SubwayStationArrivalResponse {
     pub fn new(station_id: &str) -> Self {
         Self {
             up: SubwayStationArrivalHeading::new(
-                &SubwayRealtimeItem::find_by_station(&station_id, &"up").unwrap(),
-                &SubwayTimetableItem::get_train_by_heading(&station_id, &get_subway_weekday(), &"up").unwrap()
+                &SubwayRealtimeItem::find_by_station(station_id, "up").unwrap(),
+                &SubwayTimetableItem::get_train_by_heading(station_id, &get_subway_weekday(), "up").unwrap()
             ),
             down: SubwayStationArrivalHeading::new(
-                &SubwayRealtimeItem::find_by_station(&station_id, &"down").unwrap(),
-                &SubwayTimetableItem::get_train_by_heading(&station_id, &get_subway_weekday(), &"down").unwrap()
+                &SubwayRealtimeItem::find_by_station(station_id, "down").unwrap(),
+                &SubwayTimetableItem::get_train_by_heading(station_id, &get_subway_weekday(), "down").unwrap()
             ),
         }
     }
@@ -229,13 +229,13 @@ impl SubwayStationArrivalHeading {
         let now = Local::now();
         let last_realtime_item = realtime_arrival_list.last().unwrap();
         Self {
-            realtime: realtime_arrival_list.into_iter()
-                .map(|realtime_item| SubwayStationRealtimeArrivalItem::new(realtime_item)).collect(),
-            timetable: timetable_list.into_iter()
+            realtime: realtime_arrival_list.iter()
+                .map(SubwayStationRealtimeArrivalItem::new).collect(),
+            timetable: timetable_list.iter()
                 .filter(|timetable_item| {
                     (timetable_item.departure_time - now.time()).num_minutes() > last_realtime_item.remaining_time as i64 - (now.naive_local() - last_realtime_item.last_updated_time).num_minutes() + 2
                 })
-                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(timetable_item)).collect(),
+                .map(SubwayStationTimetableArrivalItem::new).collect(),
         }
     }
 }
@@ -262,8 +262,8 @@ impl SubwayStationTimetableArrivalItem {
 impl SubwayStationTimetableResponse {
     pub fn new(station_id: &str) -> Self {
         Self {
-            up: SubwayStationTimetableHeading::new(station_id, &"up"),
-            down: SubwayStationTimetableHeading::new(station_id, &"down"),
+            up: SubwayStationTimetableHeading::new(station_id, "up"),
+            down: SubwayStationTimetableHeading::new(station_id, "down"),
         }
     }
 }
@@ -271,10 +271,10 @@ impl SubwayStationTimetableResponse {
 impl SubwayStationTimetableHeading {
     pub fn new(station_id: &str, heading: &str) -> Self {
         Self {
-            weekdays: SubwayTimetableItem::get_train_by_heading(&station_id, &"weekdays", heading)
+            weekdays: SubwayTimetableItem::get_train_by_heading(station_id, "weekdays", heading)
                 .unwrap().into_iter()
                 .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
-            weekends: SubwayTimetableItem::get_train_by_heading(&station_id, &"weekends", heading)
+            weekends: SubwayTimetableItem::get_train_by_heading(station_id, "weekends", heading)
                 .unwrap().into_iter()
                 .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
         }

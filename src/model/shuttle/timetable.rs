@@ -95,7 +95,7 @@ impl ShuttleTimeTableByShuttleStopItem {
                 .filter(weekday.eq(weekday_query))
                 .filter(departure_time.gt(now.time().sub(Duration::minutes(route_item.cumulative_time.unwrap_or(0) as i64))))
                 .order(departure_time.asc())
-                .limit(limit.clone())
+                .limit(*limit)
                 .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
             timetable.append(&mut timetable_by_route);
         }

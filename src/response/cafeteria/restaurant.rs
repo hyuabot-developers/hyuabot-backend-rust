@@ -44,7 +44,7 @@ impl RestaurantListResponse {
     pub fn new(restaurant_list: Vec<RestaurantItem>) -> Self {
         Self {
             restaurants: restaurant_list.into_iter()
-                .map(|restaurant| RestaurantListItem::new(restaurant))
+                .map(RestaurantListItem::new)
                 .collect(),
         }
     }
@@ -64,7 +64,7 @@ impl RestaurantItemResponse {
         let mut time_group: HashMap<String, Vec<MenuItem>> = HashMap::new();
         menu_list.into_iter().for_each(|menu| {
             let time = menu.time_type.clone();
-            let menu_list = time_group.entry(time).or_insert(Vec::new());
+            let menu_list = time_group.entry(time).or_default();
             menu_list.push(menu);
         });
         Self {
@@ -82,7 +82,7 @@ impl RestaurantMenuTimeListItem {
         Self {
             time: time_type.to_string(),
             menu: menu_list.into_iter()
-                .map(|menu_item| RestaurantMenuListItem::new(menu_item))
+                .map(RestaurantMenuListItem::new)
                 .collect(),
         }
     }

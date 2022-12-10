@@ -61,7 +61,7 @@ pub struct ShuttleLocationItem {
 impl ShuttleRouteListResponse {
     pub fn new(routes: Vec<ShuttleRouteItem>) -> Self {
         ShuttleRouteListResponse {
-            routes: routes.into_iter().map(|route| ShuttleRouteListItem::new(route)).collect()
+            routes: routes.into_iter().map(ShuttleRouteListItem::new).collect()
         }
     }
 }
@@ -71,23 +71,23 @@ impl ShuttleRouteListItem {
         ShuttleRouteListItem {
             name: route.route_name,
             description: ShuttleDescriptionItem {
-                korean: route.description_korean.unwrap_or_else(|| "".to_string()),
-                english: route.description_english.unwrap_or_else(|| "".to_string()),
+                korean: route.description_korean.unwrap_or_default(),
+                english: route.description_english.unwrap_or_default(),
             }
         }
     }
 }
 
 impl ShuttleRouteResponse {
-    pub fn new(route: ShuttleRouteItem, weekday: &str, stop_items: &Vec<ShuttleRouteStopItem>, timetable: &Vec<ShuttleTimeTableItem>) -> Self {
+    pub fn new(route: ShuttleRouteItem, weekday: &str, stop_items: &[ShuttleRouteStopItem], timetable: &[ShuttleTimeTableItem]) -> Self {
         let weekdays_shuttle = timetable.iter().filter(|item| item.weekday).collect::<Vec<&ShuttleTimeTableItem>>();
         let weekends_shuttle = timetable.iter().filter(|item| !item.weekday).collect::<Vec<&ShuttleTimeTableItem>>();
         let first_cumulative_time = match stop_items.first() {
-            Some(item) => item.cumulative_time.unwrap() * -1,
+            Some(item) => -item.cumulative_time.unwrap(),
             None => 0,
         };
         let last_cumulative_time = match stop_items.last() {
-            Some(item) => item.cumulative_time.unwrap() * -1,
+            Some(item) => -item.cumulative_time.unwrap(),
             None => 0,
         };
         let running_shuttle = match weekday {
@@ -131,8 +131,8 @@ impl ShuttleRouteResponse {
         ShuttleRouteResponse {
             name: route.route_name,
             description: ShuttleDescriptionItem {
-                korean: route.description_korean.unwrap_or_else(|| "".to_string()),
-                english: route.description_english.unwrap_or_else(|| "".to_string()),
+                korean: route.description_korean.unwrap_or_default(),
+                english: route.description_english.unwrap_or_default(),
             },
             stop_list,
             location_list: location,
@@ -141,7 +141,7 @@ impl ShuttleRouteResponse {
 }
 
 impl ShuttleLocationResponse {
-    pub fn new(weekday: &str, stop_items: &Vec<ShuttleRouteStopItem>, timetable: &Vec<ShuttleTimeTableItem>) -> Self {
+    pub fn new(weekday: &str, stop_items: &[ShuttleRouteStopItem], timetable: &[ShuttleTimeTableItem]) -> Self {
         let first_cumulative_time = match stop_items.first() {
             Some(item) => - item.cumulative_time.unwrap(),
             None => 0,

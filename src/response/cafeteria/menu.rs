@@ -29,7 +29,7 @@ impl RestaurantListResponse {
         menu_list.into_iter().for_each(|menu| {
             let restaurant_id = menu.restaurant_id;
             let restaurant_name = menu.restaurant_name.clone();
-            let menu_list = restaurant_group.entry((restaurant_id, restaurant_name)).or_insert(Vec::new());
+            let menu_list = restaurant_group.entry((restaurant_id, restaurant_name)).or_default();
             menu_list.push(menu);
         });
         Self {
@@ -47,7 +47,7 @@ impl RestaurantListItem {
             id: restaurant_id,
             name: restaurant_name,
             menu: menu_list.into_iter()
-                .map(|menu| RestaurantMenuListItem::new(menu))
+                .map(RestaurantMenuListItem::new)
                 .collect(),
         }
     }

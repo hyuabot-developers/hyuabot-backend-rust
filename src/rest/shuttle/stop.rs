@@ -27,7 +27,7 @@ pub async fn get_shuttle_stop_by_id(stop_id: web::Path<String>, stop_item_query:
     let period = ShuttlePeriodItem::get_current_period()?;
     let weekday = get_shuttle_weekday();
     let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(stop_id.borrow())?;
-    let limit = stop_item_query.limit.unwrap_or_else(|| 999);
+    let limit = stop_item_query.limit.unwrap_or(999);
     Ok(HttpResponse::Ok().json(ShuttleStopItemResponse::new(
         stop, &route_list, &period, &(weekday == "weekdays"), &limit, &stop_item_query.show_all,
     )))
@@ -39,12 +39,12 @@ pub async fn get_shuttle_route_stop_item(route_stop_query: web::Path<(String, St
     let period = ShuttlePeriodItem::get_current_period()?;
     let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
-    let limit = stop_item_query.limit.unwrap_or_else(|| 999);
+    let limit = stop_item_query.limit.unwrap_or(999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
         &period.period_type, &(weekday == "weekdays"), &route_item, &limit, &stop_item_query.show_all,
     ).unwrap();
     Ok(HttpResponse::Ok().json(ShuttleRouteStopResponse::new(
-        &route_item, &timetable.iter().collect()
+        &route_item, timetable
     )))
 }
 
@@ -74,6 +74,6 @@ pub async fn get_shuttle_route_stop_arrival_item(route_stop_query: web::Path<(St
         &period.period_type, &(weekday == "weekdays"), &route_item, &limit, &stop_item_query.show_all,
     ).unwrap();
     Ok(HttpResponse::Ok().json(ShuttleRouteStopArrivalResponse::new(
-        &route_item, &timetable.iter().collect()
+        &route_item, timetable
     )))
 }

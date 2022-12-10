@@ -2,7 +2,6 @@ use crate::error_handler::CustomError;
 use diesel::pg::PgConnection;
 use diesel::r2d2::ConnectionManager;
 use lazy_static::lazy_static;
-use r2d2;
 use std::env;
 use std::ops::{DerefMut};
 use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};

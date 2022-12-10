@@ -72,7 +72,7 @@ pub struct BusViaRouteTimetableStartStop {
 impl BusStopListResponse {
     pub fn new(stop_list: Vec<BusStopItem>) -> Self {
         Self {
-            stop: stop_list.into_iter().map(|stop_item| BusStopListItem::new(stop_item)).collect()
+            stop: stop_list.into_iter().map(BusStopListItem::new).collect()
         }
     }
 }
@@ -106,7 +106,7 @@ impl BusStopItemResponse {
             mobile_number: stop_item.mobile_number,
             region_name: stop_item.region_name,
             location: BusStopLocation::new(stop_item.latitude, stop_item.longitude),
-            route_list: via_route_list.into_iter().map(|via_route_item| BusViaRouteItem::new(via_route_item)).collect(),
+            route_list: via_route_list.into_iter().map(BusViaRouteItem::new).collect(),
         }
     }
 }
