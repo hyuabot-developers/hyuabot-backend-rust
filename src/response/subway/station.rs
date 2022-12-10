@@ -23,10 +23,10 @@ pub struct SubwayStationListItem {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubwayStationItemResponse {
-    pub station_id: String,
-    pub route_id: i32,
-    pub station_name: String,
-    pub station_sequence: i32,
+    pub station: String,
+    pub route: i32,
+    pub name: String,
+    pub sequence: i32,
     pub running_time: SubwayStationItemRunningTime,
 }
 
@@ -47,7 +47,7 @@ pub struct SubwayStationItemFirstLastTime {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubwayTimeItem {
-    pub terminal_station: String,
+    pub destination: String,
     pub time: String,
 }
 
@@ -163,10 +163,10 @@ impl SubwayStationItemResponse {
                 }
             );
         Self {
-            station_id: station_item.station_id.clone(),
-            route_id: station_item.route_id,
-            station_name: station_item.station_name,
-            station_sequence: station_item.station_sequence,
+            station: station_item.station_id.clone(),
+            route: station_item.route_id,
+            name: station_item.station_name,
+            sequence: station_item.station_sequence,
             running_time: SubwayStationItemRunningTime::new(
                 up_first_train, up_last_train, down_first_train, down_last_train
             ),
@@ -200,7 +200,7 @@ impl SubwayStationItemFirstLastTime {
 impl SubwayTimeItem {
     pub fn new(time_item: SubwayTimetableItem) -> Self {
         Self {
-            terminal_station: time_item.terminal_station_name,
+            destination: time_item.terminal_station_name,
             time: time_item.departure_time.format("%H:%M").to_string(),
         }
     }
