@@ -20,7 +20,7 @@ pub struct ShuttleRouteListItem {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleRouteResponse {
-    pub route_name: String,
+    pub name: String,
     pub description: ShuttleDescriptionItem,
     pub stop_list: Vec<ShuttleRouteStopItemResponse>,
     pub location_list: Vec<ShuttleLocationItem>
@@ -34,8 +34,8 @@ pub struct ShuttleDescriptionItem {
 
 #[derive(Serialize)]
 pub struct ShuttleRouteStopItemResponse {
-    pub stop_name: String,
-    pub stop_order: i32,
+    pub name: String,
+    pub order: i32,
     pub weekdays: ShuttleFirstLastTimeItem,
     pub weekends: ShuttleFirstLastTimeItem,
 }
@@ -102,8 +102,8 @@ impl ShuttleRouteResponse {
         let _ = stop_items.iter().map(
             |stop_item| {
                 stop_list.push(ShuttleRouteStopItemResponse {
-                    stop_name: stop_item.stop_name.clone(),
-                    stop_order: stop_item.stop_order.unwrap(),
+                    name: stop_item.stop_name.clone(),
+                    order: stop_item.stop_order.unwrap(),
                     weekdays: ShuttleFirstLastTimeItem {
                         first: match weekdays_shuttle.first() {
                             Some(item) => item.departure_time.add(Duration::minutes(stop_item.cumulative_time.unwrap() as i64)).to_string(),
@@ -143,7 +143,7 @@ impl ShuttleRouteResponse {
             }).collect::<Vec<()>>();
         location.sort_by(|a, b| a.location.partial_cmp(&b.location).unwrap());
         ShuttleRouteResponse {
-            route_name: route.route_name,
+            name: route.route_name,
             description: ShuttleDescriptionItem {
                 korean: route.description_korean.unwrap_or_else(|| "".to_string()),
                 english: route.description_english.unwrap_or_else(|| "".to_string()),
