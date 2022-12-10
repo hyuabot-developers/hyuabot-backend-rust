@@ -1,0 +1,19 @@
+name: "HYuabot Rust API CI"
+on:
+  push:
+    branches:
+      - main
+      - feat/*
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+          args: --all-targets --all-features -- -D warnings
