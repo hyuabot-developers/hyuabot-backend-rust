@@ -29,9 +29,10 @@ pub struct ShuttleHolidayItem {
 impl ShuttlePeriodItem {
     pub fn get_current_period() -> Result<Self, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let current_time = chrono::Utc::now().naive_local();
         let period = shuttle_period
-            .filter(period_start.lt(chrono::Utc::now().naive_utc()))
-            .filter(period_end.gt(chrono::Utc::now().naive_utc()))
+            .filter(period_start.lt(current_time))
+            .filter(period_end.gt(current_time))
             .first::<ShuttlePeriodItem>(&mut conn)?;
         Ok(period)
     }

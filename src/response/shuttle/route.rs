@@ -104,26 +104,12 @@ impl ShuttleRouteResponse {
                 stop_list.push(ShuttleRouteStopItemResponse {
                     name: stop_item.stop_name.clone(),
                     order: stop_item.stop_order.unwrap(),
-                    weekdays: ShuttleFirstLastTimeItem {
-                        first: match weekdays_shuttle.first() {
-                            Some(item) => item.departure_time.add(Duration::minutes(stop_item.cumulative_time.unwrap() as i64)).to_string(),
-                            None => "00:00:00".to_string(),
-                        },
-                        last: match weekdays_shuttle.last() {
-                            Some(item) => item.departure_time.add(Duration::minutes(stop_item.cumulative_time.unwrap() as i64)).to_string(),
-                            None => "00:00:00".to_string(),
-                        },
-                    },
-                    weekends: ShuttleFirstLastTimeItem {
-                        first: match weekends_shuttle.first() {
-                            Some(item) => item.departure_time.add(Duration::minutes(stop_item.cumulative_time.unwrap() as i64)).to_string(),
-                            None => "00:00:00".to_string(),
-                        },
-                        last: match weekends_shuttle.last() {
-                            Some(item) => item.departure_time.add(Duration::minutes(stop_item.cumulative_time.unwrap() as i64)).to_string(),
-                            None => "00:00:00".to_string(),
-                        },
-                    },
+                    weekdays: ShuttleFirstLastTimeItem::new(
+                        weekdays_shuttle.first(), weekdays_shuttle.last(), stop_item.cumulative_time.unwrap() as i64
+                    ),
+                    weekends: ShuttleFirstLastTimeItem::new(
+                        weekends_shuttle.first(), weekends_shuttle.last(), stop_item.cumulative_time.unwrap() as i64
+                    ),
                 });
             }
         ).collect::<Vec<()>>();
@@ -157,11 +143,11 @@ impl ShuttleRouteResponse {
 impl ShuttleLocationResponse {
     pub fn new(weekday: &str, stop_items: &Vec<ShuttleRouteStopItem>, timetable: &Vec<ShuttleTimeTableItem>) -> Self {
         let first_cumulative_time = match stop_items.first() {
-            Some(item) => item.cumulative_time.unwrap() * -1,
+            Some(item) => - item.cumulative_time.unwrap(),
             None => 0,
         };
         let last_cumulative_time = match stop_items.last() {
-            Some(item) => item.cumulative_time.unwrap() * -1,
+            Some(item) => - item.cumulative_time.unwrap(),
             None => 0,
         };
         let running_shuttle = match weekday {
@@ -189,6 +175,21 @@ impl ShuttleLocationResponse {
         location.sort_by(|a, b| a.location.partial_cmp(&b.location).unwrap());
         ShuttleLocationResponse {
             location_list: location,
+        }
+    }
+}
+
+impl ShuttleFirstLastTimeItem {
+    pub fn new(first: Option<&&ShuttleTimeTableItem>, last: Option<&&ShuttleTimeTableItem>, cumulative_time: i64) -> Self {
+        ShuttleFirstLastTimeItem {
+            first: match first {
+                Some(item) => item.departure_time.add(Duration::minutes(cumulative_time)).to_string(),
+                None => "00:00:00".to_string(),
+            },
+            last: match last {
+                Some(item) => item.departure_time.add(Duration::minutes(cumulative_time)).to_string(),
+                None => "00:00:00".to_string(),
+            },
         }
     }
 }
