@@ -1,7 +1,9 @@
-use actix_web::{get, HttpResponse};
 use crate::error_handler::CustomError;
 use crate::model::shuttle::stop::ShuttleStopItem;
-use crate::response::shuttle::timetable::{ShuttleArrivalListResponse, ShuttleTimetableListResponse};
+use crate::response::shuttle::timetable::{
+    ShuttleArrivalListResponse, ShuttleTimetableListResponse,
+};
+use actix_web::{get, HttpResponse};
 
 #[get("/timetable")]
 pub async fn get_shuttle_timetable() -> Result<HttpResponse, CustomError> {

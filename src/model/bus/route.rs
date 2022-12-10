@@ -39,9 +39,7 @@ pub struct BusRouteItem {
 impl BusRouteItem {
     pub fn find_all() -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let routes = bus_route
-            .order(route_id.asc())
-            .load::<Self>(&mut conn)?;
+        let routes = bus_route.order(route_id.asc()).load::<Self>(&mut conn)?;
         Ok(routes)
     }
 

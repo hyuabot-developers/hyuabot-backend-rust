@@ -1,10 +1,9 @@
-use chrono::{Local, NaiveTime};
-use serde::Serialize;
 use crate::model::subway::realtime::SubwayRealtimeItem;
 use crate::model::subway::station::SubwayStationItem;
 use crate::model::subway::timetable::SubwayTimetableItem;
 use crate::utils::subway::get_subway_weekday;
-
+use chrono::{Local, NaiveTime};
+use serde::Serialize;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -34,14 +33,14 @@ pub struct SubwayStationItemResponse {
 #[serde(rename_all = "camelCase")]
 pub struct SubwayStationItemRunningTime {
     pub up: SubwayStationItemFirstLastTime,
-    pub down: SubwayStationItemFirstLastTime
+    pub down: SubwayStationItemFirstLastTime,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SubwayStationItemFirstLastTime {
     pub first: SubwayTimeItem,
-    pub last: SubwayTimeItem
+    pub last: SubwayTimeItem,
 }
 
 #[derive(Serialize)]
@@ -97,7 +96,10 @@ pub struct SubwayStationTimetableHeading {
 impl SubwayStationListResponse {
     pub fn new(station_list: Vec<SubwayStationItem>) -> Self {
         Self {
-            station_list: station_list.into_iter().map(SubwayStationListItem::new).collect()
+            station_list: station_list
+                .into_iter()
+                .map(SubwayStationListItem::new)
+                .collect(),
         }
     }
 }
@@ -114,61 +116,64 @@ impl SubwayStationListItem {
 
 impl SubwayStationItemResponse {
     pub fn new(station_item: SubwayStationItem) -> Self {
-        let up_first_train = SubwayTimetableItem::get_first_train_by_heading(&station_item.station_id, &get_subway_weekday(), "up")
-            .unwrap_or_else(
-                |_| {
-                    SubwayTimetableItem {
-                        station_id: String::from(""),
-                        terminal_station_name: String::from(""),
-                        departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
-                        weekday: String::from(""),
-                        up_down_type: String::from(""),
-                    }
-                }
-            );
-        let down_first_train = SubwayTimetableItem::get_first_train_by_heading(&station_item.station_id, &get_subway_weekday(), "down")
-            .unwrap_or_else(
-                |_| {
-                    SubwayTimetableItem {
-                        station_id: String::from(""),
-                        terminal_station_name: String::from(""),
-                        departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
-                        weekday: String::from(""),
-                        up_down_type: String::from(""),
-                    }
-                }
-            );
-        let up_last_train = SubwayTimetableItem::get_last_train_by_heading(&station_item.station_id, &get_subway_weekday(), "up")
-            .unwrap_or_else(
-                |_| {
-                    SubwayTimetableItem {
-                        station_id: String::from(""),
-                        terminal_station_name: String::from(""),
-                        departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
-                        weekday: String::from(""),
-                        up_down_type: String::from(""),
-                    }
-                }
-            );
-        let down_last_train = SubwayTimetableItem::get_last_train_by_heading(&station_item.station_id, &get_subway_weekday(), "down")
-            .unwrap_or_else(
-                |_| {
-                    SubwayTimetableItem {
-                        station_id: String::from(""),
-                        terminal_station_name: String::from(""),
-                        departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
-                        weekday: String::from(""),
-                        up_down_type: String::from(""),
-                    }
-                }
-            );
+        let up_first_train = SubwayTimetableItem::get_first_train_by_heading(
+            &station_item.station_id,
+            &get_subway_weekday(),
+            "up",
+        )
+        .unwrap_or_else(|_| SubwayTimetableItem {
+            station_id: String::from(""),
+            terminal_station_name: String::from(""),
+            departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
+            weekday: String::from(""),
+            up_down_type: String::from(""),
+        });
+        let down_first_train = SubwayTimetableItem::get_first_train_by_heading(
+            &station_item.station_id,
+            &get_subway_weekday(),
+            "down",
+        )
+        .unwrap_or_else(|_| SubwayTimetableItem {
+            station_id: String::from(""),
+            terminal_station_name: String::from(""),
+            departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
+            weekday: String::from(""),
+            up_down_type: String::from(""),
+        });
+        let up_last_train = SubwayTimetableItem::get_last_train_by_heading(
+            &station_item.station_id,
+            &get_subway_weekday(),
+            "up",
+        )
+        .unwrap_or_else(|_| SubwayTimetableItem {
+            station_id: String::from(""),
+            terminal_station_name: String::from(""),
+            departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
+            weekday: String::from(""),
+            up_down_type: String::from(""),
+        });
+        let down_last_train = SubwayTimetableItem::get_last_train_by_heading(
+            &station_item.station_id,
+            &get_subway_weekday(),
+            "down",
+        )
+        .unwrap_or_else(|_| SubwayTimetableItem {
+            station_id: String::from(""),
+            terminal_station_name: String::from(""),
+            departure_time: NaiveTime::parse_from_str("00:00:00", "%H:%M:%S").unwrap(),
+            weekday: String::from(""),
+            up_down_type: String::from(""),
+        });
         Self {
             station: station_item.station_id.clone(),
             route: station_item.route_id,
             name: station_item.station_name,
             sequence: station_item.station_sequence,
             running_time: SubwayStationItemRunningTime::new(
-                up_first_train, up_last_train, down_first_train, down_last_train
+                up_first_train,
+                up_last_train,
+                down_first_train,
+                down_last_train,
             ),
         }
     }
@@ -211,11 +216,17 @@ impl SubwayStationArrivalResponse {
         Self {
             up: SubwayStationArrivalHeading::new(
                 &SubwayRealtimeItem::find_by_station(station_id, "up").unwrap(),
-                &SubwayTimetableItem::get_train_by_heading(station_id, &get_subway_weekday(), "up").unwrap()
+                &SubwayTimetableItem::get_train_by_heading(station_id, &get_subway_weekday(), "up")
+                    .unwrap(),
             ),
             down: SubwayStationArrivalHeading::new(
                 &SubwayRealtimeItem::find_by_station(station_id, "down").unwrap(),
-                &SubwayTimetableItem::get_train_by_heading(station_id, &get_subway_weekday(), "down").unwrap()
+                &SubwayTimetableItem::get_train_by_heading(
+                    station_id,
+                    &get_subway_weekday(),
+                    "down",
+                )
+                .unwrap(),
             ),
         }
     }
@@ -223,19 +234,27 @@ impl SubwayStationArrivalResponse {
 
 impl SubwayStationArrivalHeading {
     pub fn new(
-        realtime_arrival_list:&[SubwayRealtimeItem],
+        realtime_arrival_list: &[SubwayRealtimeItem],
         timetable_list: &[SubwayTimetableItem],
     ) -> Self {
         let now = Local::now();
         let last_realtime_item = realtime_arrival_list.last().unwrap();
         Self {
-            realtime: realtime_arrival_list.iter()
-                .map(SubwayStationRealtimeArrivalItem::new).collect(),
-            timetable: timetable_list.iter()
+            realtime: realtime_arrival_list
+                .iter()
+                .map(SubwayStationRealtimeArrivalItem::new)
+                .collect(),
+            timetable: timetable_list
+                .iter()
                 .filter(|timetable_item| {
-                    (timetable_item.departure_time - now.time()).num_minutes() > last_realtime_item.remaining_time as i64 - (now.naive_local() - last_realtime_item.last_updated_time).num_minutes() + 2
+                    (timetable_item.departure_time - now.time()).num_minutes()
+                        > last_realtime_item.remaining_time as i64
+                            - (now.naive_local() - last_realtime_item.last_updated_time)
+                                .num_minutes()
+                            + 2
                 })
-                .map(SubwayStationTimetableArrivalItem::new).collect(),
+                .map(SubwayStationTimetableArrivalItem::new)
+                .collect(),
         }
     }
 }
@@ -272,11 +291,15 @@ impl SubwayStationTimetableHeading {
     pub fn new(station_id: &str, heading: &str) -> Self {
         Self {
             weekdays: SubwayTimetableItem::get_train_by_heading(station_id, "weekdays", heading)
-                .unwrap().into_iter()
-                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
+                .unwrap()
+                .into_iter()
+                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item))
+                .collect(),
             weekends: SubwayTimetableItem::get_train_by_heading(station_id, "weekends", heading)
-                .unwrap().into_iter()
-                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item)).collect(),
+                .unwrap()
+                .into_iter()
+                .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item))
+                .collect(),
         }
     }
 }

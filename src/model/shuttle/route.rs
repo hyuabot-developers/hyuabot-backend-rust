@@ -15,7 +15,6 @@ pub struct ShuttleRouteItem {
     pub description_english: Option<String>,
 }
 
-
 impl ShuttleRouteItem {
     pub fn find_all() -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));

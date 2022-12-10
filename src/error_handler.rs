@@ -1,10 +1,10 @@
-use std::fmt;
-use actix_web::{HttpResponse, ResponseError};
 use actix_web::body::BoxBody;
 use actix_web::http::StatusCode;
+use actix_web::{HttpResponse, ResponseError};
 use diesel::result::Error as DieselError;
 use serde::Deserialize;
 use serde_json::json;
+use std::fmt;
 
 #[derive(Debug, Deserialize)]
 pub struct CustomError {
@@ -14,7 +14,10 @@ pub struct CustomError {
 
 impl CustomError {
     pub fn new(status_code: u16, message: String) -> Self {
-        CustomError { status_code, message }
+        CustomError {
+            status_code,
+            message,
+        }
     }
 }
 
@@ -27,7 +30,9 @@ impl fmt::Display for CustomError {
 impl From<DieselError> for CustomError {
     fn from(error: DieselError) -> Self {
         match error {
-            DieselError::DatabaseError(_, err) => CustomError::new(500, format!("Database Error: {}", err.message())),
+            DieselError::DatabaseError(_, err) => {
+                CustomError::new(500, format!("Database Error: {}", err.message()))
+            }
             DieselError::NotFound => CustomError::new(404, "Resource Not found".to_string()),
             _ => CustomError::new(500, "Internal Server Error".to_string()),
         }

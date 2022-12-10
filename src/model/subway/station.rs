@@ -1,8 +1,7 @@
-use diesel::prelude::*;
-
-use serde::Serialize;
 use crate::db::connection;
 use crate::schema::subway_route_station::dsl::*;
+use diesel::prelude::*;
+use serde::Serialize;
 
 #[derive(Queryable, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -22,12 +21,13 @@ pub struct SubwayStationItem {
 impl SubwayStationItem {
     pub fn find_all() -> Result<Vec<SubwayStationItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let station_list = subway_route_station
-            .load::<SubwayStationItem>(&mut conn)?;
+        let station_list = subway_route_station.load::<SubwayStationItem>(&mut conn)?;
         Ok(station_list)
     }
 
-    pub fn find_by_name(station_name_query: &str) -> Result<Vec<SubwayStationItem>, diesel::result::Error> {
+    pub fn find_by_name(
+        station_name_query: &str,
+    ) -> Result<Vec<SubwayStationItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let station_list = subway_route_station
             .filter(station_name.like(format!("%{}%", station_name_query)))

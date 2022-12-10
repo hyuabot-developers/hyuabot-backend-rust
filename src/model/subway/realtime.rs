@@ -2,8 +2,8 @@ use chrono::NaiveDateTime;
 use diesel::prelude::*;
 
 use crate::db::connection;
-use crate::schema::subway_realtime::dsl::*;
 use crate::schema::subway_realtime::dsl as subway_realtime_table;
+use crate::schema::subway_realtime::dsl::*;
 use crate::schema::subway_route_station::dsl::*;
 
 #[derive(Queryable)]
@@ -35,7 +35,10 @@ pub struct SubwayRealtimeItem {
 }
 
 impl SubwayRealtimeItem {
-    pub fn find_by_station(station_id_query: &str, heading: &str) -> Result<Vec<Self>, diesel::result::Error> {
+    pub fn find_by_station(
+        station_id_query: &str,
+        heading: &str,
+    ) -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let route = subway_realtime
             .inner_join(subway_route_station)

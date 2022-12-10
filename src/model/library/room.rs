@@ -1,8 +1,6 @@
-use diesel::prelude::*;
-
 use crate::db::connection;
 use crate::schema::reading_room::dsl::*;
-
+use diesel::prelude::*;
 
 #[derive(Queryable)]
 pub struct ReadingRoomItem {
@@ -35,7 +33,10 @@ impl ReadingRoomItem {
         Ok(result)
     }
 
-    pub fn get_by_id(campus_id_query: &i32, room_id_query: &i32) -> Result<Self, diesel::result::Error> {
+    pub fn get_by_id(
+        campus_id_query: &i32,
+        room_id_query: &i32,
+    ) -> Result<Self, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let result = reading_room
             .filter(campus_id.eq(campus_id_query))

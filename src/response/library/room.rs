@@ -1,6 +1,5 @@
-use serde::Serialize;
 use crate::model::library::room::ReadingRoomItem;
-
+use serde::Serialize;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]

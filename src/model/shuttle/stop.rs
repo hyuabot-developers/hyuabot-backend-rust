@@ -4,7 +4,6 @@ use serde::Serialize;
 use crate::db::connection;
 use crate::schema::shuttle_stop::dsl::*;
 
-
 #[derive(Queryable, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleStopItem {
@@ -19,12 +18,13 @@ pub struct ShuttleStopItem {
 impl ShuttleStopItem {
     pub fn find_all() -> Result<Vec<ShuttleStopItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let stops = shuttle_stop
-            .load::<ShuttleStopItem>(&mut conn)?;
+        let stops = shuttle_stop.load::<ShuttleStopItem>(&mut conn)?;
         Ok(stops)
     }
 
-    pub fn find_by_name(stop_name_query: &str) -> Result<Vec<ShuttleStopItem>, diesel::result::Error> {
+    pub fn find_by_name(
+        stop_name_query: &str,
+    ) -> Result<Vec<ShuttleStopItem>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let stops = shuttle_stop
             .filter(stop_name.like(format!("%{}%", stop_name_query)))
@@ -32,7 +32,9 @@ impl ShuttleStopItem {
         Ok(stops)
     }
 
-    pub fn get_one_by_name(stop_name_query: &str) -> Result<ShuttleStopItem, diesel::result::Error> {
+    pub fn get_one_by_name(
+        stop_name_query: &str,
+    ) -> Result<ShuttleStopItem, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let stop = shuttle_stop
             .filter(stop_name.eq(stop_name_query))

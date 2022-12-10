@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use serde::Serialize;
 use crate::model::cafeteria::menu::RestaurantMenuItem;
+use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -29,24 +29,33 @@ impl RestaurantListResponse {
         menu_list.into_iter().for_each(|menu| {
             let restaurant_id = menu.restaurant_id;
             let restaurant_name = menu.restaurant_name.clone();
-            let menu_list = restaurant_group.entry((restaurant_id, restaurant_name)).or_default();
+            let menu_list = restaurant_group
+                .entry((restaurant_id, restaurant_name))
+                .or_default();
             menu_list.push(menu);
         });
         Self {
-            restaurants: restaurant_group.into_iter()
-                .map(|((restaurant_id, restaurant_name), menu_list)|
-                    RestaurantListItem::new(restaurant_id, restaurant_name, menu_list))
+            restaurants: restaurant_group
+                .into_iter()
+                .map(|((restaurant_id, restaurant_name), menu_list)| {
+                    RestaurantListItem::new(restaurant_id, restaurant_name, menu_list)
+                })
                 .collect(),
         }
     }
 }
 
 impl RestaurantListItem {
-    pub fn new(restaurant_id: i32, restaurant_name: String, menu_list: Vec<RestaurantMenuItem>) -> Self {
+    pub fn new(
+        restaurant_id: i32,
+        restaurant_name: String,
+        menu_list: Vec<RestaurantMenuItem>,
+    ) -> Self {
         Self {
             id: restaurant_id,
             name: restaurant_name,
-            menu: menu_list.into_iter()
+            menu: menu_list
+                .into_iter()
                 .map(RestaurantMenuListItem::new)
                 .collect(),
         }

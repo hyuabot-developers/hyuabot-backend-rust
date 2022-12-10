@@ -26,8 +26,7 @@ pub struct BusStopItem {
 impl BusStopItem {
     pub fn find_all() -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let stops = bus_stop
-            .load::<BusStopItem>(&mut conn)?;
+        let stops = bus_stop.load::<BusStopItem>(&mut conn)?;
         Ok(stops)
     }
 

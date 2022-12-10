@@ -2,11 +2,10 @@ use diesel::prelude::*;
 use serde::Serialize;
 
 use crate::db::connection;
-use crate::schema::bus_route::dsl::*;
 use crate::schema::bus_route::dsl as bus_route_table;
-use crate::schema::bus_route_stop::dsl::*;
+use crate::schema::bus_route::dsl::*;
 use crate::schema::bus_route_stop::dsl as bus_route_stop_table;
-
+use crate::schema::bus_route_stop::dsl::*;
 
 #[derive(Queryable, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -28,7 +27,13 @@ impl BusRouteStopItem {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let stops = bus_route_stop
             .inner_join(bus_route)
-            .select((bus_route_table::route_id, route_name, stop_id, stop_sequence, bus_route_stop_table::start_stop_id))
+            .select((
+                bus_route_table::route_id,
+                route_name,
+                stop_id,
+                stop_sequence,
+                bus_route_stop_table::start_stop_id,
+            ))
             .filter(stop_id.eq(stop_id_query))
             .load::<BusRouteStopItem>(&mut conn)?;
         Ok(stops)

@@ -2,9 +2,8 @@ use chrono::NaiveDate;
 use diesel::prelude::*;
 
 use crate::db::connection;
-use crate::schema::shuttle_period::dsl::*;
 use crate::schema::shuttle_holiday::dsl::*;
-
+use crate::schema::shuttle_period::dsl::*;
 
 #[derive(Queryable)]
 pub struct ShuttlePeriodItem {

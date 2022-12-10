@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use serde::Serialize;
 use crate::model::cafeteria::menu::MenuItem;
 use crate::model::cafeteria::restaurant::RestaurantItem;
+use serde::Serialize;
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -38,12 +38,11 @@ pub struct RestaurantMenuListItem {
     pub price: String,
 }
 
-
-
 impl RestaurantListResponse {
     pub fn new(restaurant_list: Vec<RestaurantItem>) -> Self {
         Self {
-            restaurants: restaurant_list.into_iter()
+            restaurants: restaurant_list
+                .into_iter()
                 .map(RestaurantListItem::new)
                 .collect(),
         }
@@ -70,7 +69,8 @@ impl RestaurantItemResponse {
         Self {
             id: restaurant.restaurant_id,
             name: restaurant.restaurant_name,
-            time: time_group.into_iter()
+            time: time_group
+                .into_iter()
                 .map(|(time, menu_list)| RestaurantMenuTimeListItem::new(&time, menu_list))
                 .collect(),
         }
@@ -81,7 +81,8 @@ impl RestaurantMenuTimeListItem {
     pub fn new(time_type: &str, menu_list: Vec<MenuItem>) -> Self {
         Self {
             time: time_type.to_string(),
-            menu: menu_list.into_iter()
+            menu: menu_list
+                .into_iter()
                 .map(RestaurantMenuListItem::new)
                 .collect(),
         }

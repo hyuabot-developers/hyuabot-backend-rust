@@ -18,7 +18,10 @@ pub struct BusTimetableItem {
 }
 
 impl BusTimetableItem {
-    pub fn find_by_stop_and_route_id(route_id_query: &i32, start_stop_id_query: &i32) -> Result<Vec<Self>, diesel::result::Error> {
+    pub fn find_by_stop_and_route_id(
+        route_id_query: &i32,
+        start_stop_id_query: &i32,
+    ) -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let timetable = bus_timetable
             .filter(start_stop_id.eq(start_stop_id_query))
@@ -29,8 +32,11 @@ impl BusTimetableItem {
     }
 
     pub fn find_by_weekday_stop_and_route_id(
-        route_id_query: &i32, start_stop_id_query: &i32,
-        weekday_query: Option<&str>, show_all: Option<&bool>) -> Result<Vec<Self>, diesel::result::Error> {
+        route_id_query: &i32,
+        start_stop_id_query: &i32,
+        weekday_query: Option<&str>,
+        show_all: Option<&bool>,
+    ) -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let now = chrono::Local::now().time();
         if show_all.eq(&Some(&true)) {

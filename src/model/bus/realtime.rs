@@ -25,7 +25,10 @@ pub struct BusRealtimeItem {
 }
 
 impl BusRealtimeItem {
-    pub fn find_by_stop_and_route_id(route_id_query: &i32, stop_id_query: &i32) -> Result<Vec<Self>, diesel::result::Error> {
+    pub fn find_by_stop_and_route_id(
+        route_id_query: &i32,
+        stop_id_query: &i32,
+    ) -> Result<Vec<Self>, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let realtime_list = bus_realtime
             .filter(stop_id.eq(stop_id_query))

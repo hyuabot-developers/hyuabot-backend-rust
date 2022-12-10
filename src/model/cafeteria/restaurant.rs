@@ -3,7 +3,6 @@ use diesel::prelude::*;
 use crate::db::connection;
 use crate::schema::restaurant::dsl::*;
 
-
 #[derive(Queryable)]
 pub struct RestaurantItem {
     #[diesel(sql_type = Integer)]
@@ -24,7 +23,10 @@ impl RestaurantItem {
         Ok(result)
     }
 
-    pub fn get_by_id(campus_id_query: &i32, restaurant_id_query: &i32) -> Result<Self, diesel::result::Error> {
+    pub fn get_by_id(
+        campus_id_query: &i32,
+        restaurant_id_query: &i32,
+    ) -> Result<Self, diesel::result::Error> {
         let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
         let result = restaurant
             .select((campus_id, restaurant_id, restaurant_name))

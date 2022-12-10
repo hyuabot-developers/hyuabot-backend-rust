@@ -1,9 +1,9 @@
-use chrono::Duration;
-use serde::Serialize;
 use crate::model::shuttle::period::ShuttlePeriodItem;
 use crate::model::shuttle::route_stop::ShuttleRouteStopItemWithDescription;
 use crate::model::shuttle::stop::ShuttleStopItem;
 use crate::model::shuttle::timetable::ShuttleTimeTableByShuttleStopItem;
+use chrono::Duration;
+use serde::Serialize;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -63,7 +63,10 @@ pub struct ShuttleRouteDescriptionResponse {
 impl ShuttleStopListResponse {
     pub fn new(stop_list: Vec<ShuttleStopItem>) -> Self {
         ShuttleStopListResponse {
-            stop_list: stop_list.into_iter().map(ShuttleStopListItemResponse::new).collect()
+            stop_list: stop_list
+                .into_iter()
+                .map(ShuttleStopListItemResponse::new)
+                .collect(),
         }
     }
 }
@@ -78,7 +81,14 @@ impl ShuttleStopListItemResponse {
 }
 
 impl ShuttleStopItemResponse {
-    pub fn new(stop_item: ShuttleStopItem, _routes: &Vec<ShuttleRouteStopItemWithDescription>, _period: &ShuttlePeriodItem, _weekday: &bool, _limit: &i64, _show_all: &Option<bool>) -> Self {
+    pub fn new(
+        stop_item: ShuttleStopItem,
+        _routes: &Vec<ShuttleRouteStopItemWithDescription>,
+        _period: &ShuttlePeriodItem,
+        _weekday: &bool,
+        _limit: &i64,
+        _show_all: &Option<bool>,
+    ) -> Self {
         let route_list = Vec::new();
         ShuttleStopItemResponse {
             stop_name: stop_item.stop_name,
@@ -102,43 +112,70 @@ impl ShuttleStopLocationResponse {
 }
 
 impl ShuttleRouteStopResponse {
-    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: Vec<ShuttleTimeTableByShuttleStopItem>) -> Self {
+    pub fn new(
+        route: &ShuttleRouteStopItemWithDescription,
+        timetable_list: Vec<ShuttleTimeTableByShuttleStopItem>,
+    ) -> Self {
         let description_korean = route.description_korean.clone().unwrap_or_default();
         let description_english = route.description_english.clone().unwrap_or_default();
         let now = chrono::Local::now().time();
         ShuttleRouteStopResponse {
             name: route.route_name.clone(),
-            description: ShuttleRouteDescriptionResponse{
+            description: ShuttleRouteDescriptionResponse {
                 korean: description_korean,
                 english: description_english,
             },
-            timetable: timetable_list.iter().map(
-                |item| (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64)).to_string()
-            ).collect(),
-            arrival_list: timetable_list.iter().map(
-                |item| (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64) - now).num_minutes()
-            ).collect(),
+            timetable: timetable_list
+                .iter()
+                .map(|item| {
+                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64))
+                        .to_string()
+                })
+                .collect(),
+            arrival_list: timetable_list
+                .iter()
+                .map(|item| {
+                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64)
+                        - now)
+                        .num_minutes()
+                })
+                .collect(),
         }
     }
 }
 
 impl ShuttleRouteStopTimetableResponse {
-    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>) -> Self {
+    pub fn new(
+        route: &ShuttleRouteStopItemWithDescription,
+        timetable_list: &Vec<&ShuttleTimeTableByShuttleStopItem>,
+    ) -> Self {
         ShuttleRouteStopTimetableResponse {
-            timetable: timetable_list.iter().map(
-                |item| (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64)).to_string()
-            ).collect(),
+            timetable: timetable_list
+                .iter()
+                .map(|item| {
+                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64))
+                        .to_string()
+                })
+                .collect(),
         }
     }
 }
 
 impl ShuttleRouteStopArrivalResponse {
-    pub fn new(route: &ShuttleRouteStopItemWithDescription, timetable_list: Vec<ShuttleTimeTableByShuttleStopItem>) -> Self {
+    pub fn new(
+        route: &ShuttleRouteStopItemWithDescription,
+        timetable_list: Vec<ShuttleTimeTableByShuttleStopItem>,
+    ) -> Self {
         let now = chrono::Local::now().time();
         ShuttleRouteStopArrivalResponse {
-            arrival_list: timetable_list.iter().map(
-                |item| (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64) - now).num_minutes()
-            ).collect(),
+            arrival_list: timetable_list
+                .iter()
+                .map(|item| {
+                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64)
+                        - now)
+                        .num_minutes()
+                })
+                .collect(),
         }
     }
 }
