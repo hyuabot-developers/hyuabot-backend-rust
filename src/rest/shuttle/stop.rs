@@ -54,7 +54,7 @@ pub async fn get_shuttle_route_stop_timetable_item(route_stop_query: web::Path<(
     let period = ShuttlePeriodItem::get_current_period()?;
     let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
-    let limit = stop_item_query.limit.unwrap_or_else(|| 999);
+    let limit = stop_item_query.limit.unwrap_or(999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
         &period.period_type, &(weekday == "weekdays"), &route_item, &limit, &stop_item_query.show_all,
     ).unwrap();
@@ -69,7 +69,7 @@ pub async fn get_shuttle_route_stop_arrival_item(route_stop_query: web::Path<(St
     let period = ShuttlePeriodItem::get_current_period()?;
     let weekday = get_shuttle_weekday();
     let route_item = ShuttleRouteStopItem::get_route_item_by_stop_name(&query.borrow().0, &query.borrow().1)?;
-    let limit = stop_item_query.limit.unwrap_or_else(|| 999);
+    let limit = stop_item_query.limit.unwrap_or(999);
     let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
         &period.period_type, &(weekday == "weekdays"), &route_item, &limit, &stop_item_query.show_all,
     ).unwrap();

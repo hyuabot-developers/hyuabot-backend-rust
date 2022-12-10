@@ -78,8 +78,8 @@ impl ShuttleStopListItemResponse {
 }
 
 impl ShuttleStopItemResponse {
-    pub fn new(stop_item: ShuttleStopItem, routes: &Vec<ShuttleRouteStopItemWithDescription>, period: &ShuttlePeriodItem, weekday: &bool, limit: &i64, show_all: &Option<bool>) -> Self {
-        let mut route_list = Vec::new();
+    pub fn new(stop_item: ShuttleStopItem, _routes: &Vec<ShuttleRouteStopItemWithDescription>, _period: &ShuttlePeriodItem, _weekday: &bool, _limit: &i64, _show_all: &Option<bool>) -> Self {
+        let route_list = Vec::new();
         ShuttleStopItemResponse {
             stop_name: stop_item.stop_name,
             location: ShuttleStopLocationResponse::new(stop_item.latitude, stop_item.longitude),

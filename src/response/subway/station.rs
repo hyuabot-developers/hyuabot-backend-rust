@@ -223,8 +223,8 @@ impl SubwayStationArrivalResponse {
 
 impl SubwayStationArrivalHeading {
     pub fn new(
-        realtime_arrival_list: &Vec<SubwayRealtimeItem>,
-        timetable_list: &Vec<SubwayTimetableItem>,
+        realtime_arrival_list:&[SubwayRealtimeItem],
+        timetable_list: &[SubwayTimetableItem],
     ) -> Self {
         let now = Local::now();
         let last_realtime_item = realtime_arrival_list.last().unwrap();
