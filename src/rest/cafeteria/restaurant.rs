@@ -5,7 +5,7 @@ use crate::error_handler::CustomError;
 use crate::model::cafeteria::restaurant::RestaurantItem;
 use crate::response::cafeteria::restaurant::RestaurantListResponse;
 
-#[get("/campus/{campus_id}")]
+#[get("/campus/{campus_id}/restaurant")]
 pub async fn get_restaurant_list_by_campus_id(campus_id: Path<i32>) -> Result<HttpResponse, CustomError> {
     let restaurant_list = RestaurantItem::find_by_campus_id(&campus_id)?;
     Ok(HttpResponse::Ok().json(RestaurantListResponse::new(restaurant_list)))
