@@ -24,6 +24,5 @@ jobs:
 
       - name: Lint
         run: |
-          cd phaser
           cargo fmt -- --check
           cargo clippy -- -D warnings
