@@ -1,0 +1,56 @@
+name: "HYuabot Rust API CI"
+on:
+  push:
+    branches:
+      - main
+      - feat/*
+jobs:
+  lint:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update local toolchain
+        run: |
+          rustup update
+
+      - name: Toolchain info
+        run: |
+          cargo --version --verbose
+          rustc --version
+
+      - name: Lint
+        run: |
+          cargo fmt -- --check
+  build:
+    runs-on: self-hosted
+    needs:
+      - lint
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update local toolchain
+        run: |
+          rustup update
+
+      - name: Toolchain info
+        run: |
+          cargo --version --verbose
+          rustc --version
+
+      - name: Build
+        run: |
+          cargo build --release
+  docker-image-build:
+    runs-on: self-hosted
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Build Environment
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: hyuabot/hyuabot-api-server:latest

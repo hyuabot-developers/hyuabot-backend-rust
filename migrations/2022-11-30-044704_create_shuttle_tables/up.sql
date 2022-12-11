@@ -30,8 +30,8 @@ create table if not exists shuttle_route_stop (
 create table if not exists shuttle_period(
     -- 셔틀버스 운행 기간 ID
     period_type varchar(20) not null,
-    period_start timestamptz not null,
-    period_end timestamptz not null,
+    period_start timestamp not null,
+    period_end timestamp not null,
     constraint pk_shuttle_period primary key (period_type, period_start, period_end),
     constraint fk_period_type foreign key (period_type) references shuttle_period_type(period_type)
 );
@@ -41,7 +41,7 @@ create table if not exists shuttle_timetable(
     period_type varchar(20) not null,
     weekday boolean not null, -- 평일 여부
     route_name varchar(15) not null,
-    departure_time timetz not null,
+    departure_time time not null,
     start_stop varchar(15) not null,
     constraint pk_shuttle_timetable primary key (period_type, weekday, route_name, departure_time),
     constraint fk_period_type foreign key (period_type) references shuttle_period_type(period_type),
