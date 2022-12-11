@@ -1,16 +1,9 @@
-use crate::model::shuttle::period::{ShuttleHolidayItem, ShuttlePeriodItem};
-use chrono::{Datelike, Duration};
+use chrono::Duration;
 use serde::Serialize;
 use std::collections::HashMap;
 
-use crate::model::shuttle::route_stop::{
-    ShuttleRouteStopItem, ShuttleRouteStopItemWithDescription,
-};
-use crate::model::shuttle::stop::ShuttleStopItem;
-use crate::model::shuttle::timetable::{
-    EntireShuttleTimeTableItem, ShuttleTimeTableByShuttleStopItem,
-};
-use crate::response::shuttle::stop::ShuttleRouteDescriptionResponse;
+use crate::model::shuttle::timetable::EntireShuttleTimeTableItem;
+use crate::utils::shuttle::get_shuttle_weekday;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +14,7 @@ pub struct ShuttleTimetableListResponse {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleArrivalListResponse {
-    pub stop_list: Vec<ShuttleArrivalStopItem>,
+    pub stop: Vec<ShuttleArrivalStopItem>,
 }
 
 #[derive(Serialize)]
@@ -35,7 +28,7 @@ pub struct ShuttleTimetableStopItem {
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleArrivalStopItem {
     pub name: String,
-    pub route_list: Vec<ShuttleArrivalRouteStopItem>,
+    pub route: Vec<ShuttleArrivalRouteStopItem>,
 }
 
 #[derive(Serialize)]
@@ -50,7 +43,6 @@ pub struct ShuttleTimetableRouteStopItem {
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleArrivalRouteStopItem {
     pub name: String,
-    pub description: ShuttleRouteDescriptionResponse,
     pub arrival: Vec<i64>,
 }
 
@@ -127,26 +119,27 @@ impl ShuttleTimetableRouteStopItem {
 }
 
 impl ShuttleArrivalListResponse {
-    pub fn new(stop_list: &[ShuttleStopItem]) -> Self {
-        let period = ShuttlePeriodItem::get_current_period().unwrap();
-        let weekday =
-            match ShuttleHolidayItem::get_holiday_by_date(chrono::Local::now().naive_local()) {
-                Ok(holiday_item) => holiday_item.holiday_type,
-                Err(_) => {
-                    if chrono::Local::now().weekday() == chrono::Weekday::Sat
-                        || chrono::Local::now().weekday() == chrono::Weekday::Sun
-                    {
-                        "weekends".to_string()
-                    } else {
-                        "weekdays".to_string()
-                    }
-                }
-            };
+    pub fn new(timetable_list: &[EntireShuttleTimeTableItem]) -> Self {
+        let mut timetable_groups: HashMap<
+            String,
+            HashMap<String, Vec<&EntireShuttleTimeTableItem>>,
+        > = HashMap::new();
+        timetable_list.into_iter().for_each(|timetable| {
+            let stop_name = timetable.stop_name.clone();
+            let route_name = timetable.route_name.clone();
+            let timetable_group = timetable_groups
+                .entry(stop_name)
+                .or_default()
+                .entry(route_name)
+                .or_default();
+            timetable_group.push(timetable);
+        });
+        let weekday = get_shuttle_weekday() == "weekdays";
         ShuttleArrivalListResponse {
-            stop_list: stop_list
-                .iter()
-                .map(|stop| {
-                    ShuttleArrivalStopItem::new(stop, &period.period_type, &(weekday == "weekdays"))
+            stop: timetable_groups
+                .into_iter()
+                .map(|(stop_name, timetable_group)| {
+                    ShuttleArrivalStopItem::new(stop_name, weekday, timetable_group)
                 })
                 .collect(),
         }
@@ -154,14 +147,18 @@ impl ShuttleArrivalListResponse {
 }
 
 impl ShuttleArrivalStopItem {
-    pub fn new(stop: &ShuttleStopItem, period: &str, weekday: &bool) -> Self {
-        let route_list = ShuttleRouteStopItem::get_route_list_by_stop_name(&stop.stop_name)
-            .unwrap_or_else(|_| vec![]);
+    pub fn new(
+        stop_name: String,
+        weekday: bool,
+        timetable_group: HashMap<String, Vec<&EntireShuttleTimeTableItem>>,
+    ) -> Self {
         ShuttleArrivalStopItem {
-            name: stop.stop_name.clone(),
-            route_list: route_list
-                .iter()
-                .map(|route| ShuttleArrivalRouteStopItem::new(route, period, weekday))
+            name: stop_name,
+            route: timetable_group
+                .into_iter()
+                .map(|(route_name, timetable_list)| {
+                    ShuttleArrivalRouteStopItem::new(route_name.clone(), weekday, timetable_list)
+                })
                 .collect(),
         }
     }
@@ -169,30 +166,18 @@ impl ShuttleArrivalStopItem {
 
 impl ShuttleArrivalRouteStopItem {
     pub fn new(
-        route_stop: &ShuttleRouteStopItemWithDescription,
-        period: &str,
-        weekday: &bool,
+        route_name: String,
+        weekday: bool,
+        timetable: Vec<&EntireShuttleTimeTableItem>,
     ) -> Self {
-        let timetable = ShuttleTimeTableByShuttleStopItem::get_timetable_by_route_stop_name(
-            period,
-            weekday,
-            route_stop,
-            &999,
-            &Option::from(false),
-        )
-        .unwrap();
         let now = chrono::Local::now().naive_local().time();
         ShuttleArrivalRouteStopItem {
-            name: route_stop.route_name.clone(),
-            description: ShuttleRouteDescriptionResponse {
-                korean: route_stop.description_korean.clone().unwrap(),
-                english: route_stop.description_english.clone().unwrap(),
-            },
+            name: route_name.clone(),
             arrival: timetable
                 .iter()
+                .filter(|timetable| timetable.weekday == weekday)
                 .map(|item| {
-                    (item.departure_time
-                        + Duration::minutes(route_stop.cumulative_time.unwrap() as i64)
+                    (item.departure_time + Duration::minutes(item.cumulative_time.unwrap() as i64)
                         - now)
                         .num_minutes()
                 })

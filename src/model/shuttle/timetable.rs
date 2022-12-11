@@ -63,48 +63,6 @@ impl ShuttleTimeTableItem {
 }
 
 impl ShuttleTimeTableByShuttleStopItem {
-    pub fn get_timetable_by_stop_name(
-        period_query: &str,
-        weekday_query: &bool,
-        route_list: &Vec<ShuttleRouteStopItemWithDescription>,
-        limit: &i64,
-        show_all: &Option<bool>,
-    ) -> Result<Vec<ShuttleTimeTableByShuttleStopItem>, diesel::result::Error> {
-        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let mut timetable = Vec::new();
-        let now = chrono::Local::now().naive_local();
-        if show_all.is_some() && show_all.unwrap() {
-            for route in route_list {
-                let mut route_timetable = shuttle_timetable
-                    .select((shuttle_timetable_table::route_name, departure_time))
-                    .filter(shuttle_timetable_table::route_name.eq(&route.route_name))
-                    .filter(shuttle_timetable_table::period_type.eq(period_query))
-                    .filter(weekday.eq(weekday_query))
-                    .order(departure_time.asc())
-                    .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
-                timetable.append(&mut route_timetable);
-            }
-        } else {
-            for route in route_list {
-                let mut timetable_by_route = shuttle_timetable
-                    .select((shuttle_timetable_table::route_name, departure_time))
-                    .filter(shuttle_timetable_table::route_name.eq(&route.route_name))
-                    .filter(shuttle_timetable_table::period_type.eq(period_query))
-                    .filter(weekday.eq(weekday_query))
-                    .filter(
-                        departure_time.gt(now
-                            .time()
-                            .sub(Duration::minutes(route.cumulative_time.unwrap_or(0) as i64))),
-                    )
-                    .order(departure_time.asc())
-                    .limit(*limit)
-                    .load::<ShuttleTimeTableByShuttleStopItem>(&mut conn)?;
-                timetable.append(&mut timetable_by_route);
-            }
-        }
-        Ok(timetable)
-    }
-
     pub fn get_timetable_by_route_stop_name(
         period_query: &str,
         weekday_query: &bool,
@@ -165,6 +123,33 @@ impl EntireShuttleTimeTableItem {
             ))
             .filter(period_start.le(now))
             .filter(period_end.gt(now))
+            .load::<EntireShuttleTimeTableItem>(&mut conn)?;
+        Ok(timetable)
+    }
+
+    pub fn find_all_after_now() -> Result<Vec<Self>, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        let now = chrono::Local::now().naive_local();
+        let timetable = shuttle_timetable
+            .inner_join(
+                shuttle_period
+                    .on(shuttle_timetable_table::period_type.eq(shuttle_period_table::period_type)),
+            )
+            .inner_join(
+                shuttle_route_stop
+                    .on(shuttle_timetable_table::route_name
+                        .eq(shuttle_route_stop_table::route_name)),
+            )
+            .select((
+                shuttle_timetable_table::route_name,
+                stop_name,
+                weekday,
+                departure_time,
+                cumulative_time,
+            ))
+            .filter(period_start.le(now))
+            .filter(period_end.gt(now))
+            .filter(departure_time.gt(now.time()))
             .load::<EntireShuttleTimeTableItem>(&mut conn)?;
         Ok(timetable)
     }
