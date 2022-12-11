@@ -1,5 +1,6 @@
 use crate::error_handler::CustomError;
 use crate::model::subway::station::SubwayStationItem;
+use crate::model::subway::timetable::SubwayTimetableItem;
 use crate::request::subway::station::SubwayStationQuery;
 use crate::response::subway::station::SubwayStationArrivalResponse;
 use crate::response::subway::station::SubwayStationListResponse;
@@ -39,5 +40,6 @@ pub async fn get_subway_arrival_by_station(
 pub async fn get_subway_timetable_by_station(
     station_id: Path<String>,
 ) -> Result<HttpResponse, CustomError> {
-    Ok(HttpResponse::Ok().json(SubwayStationTimetableResponse::new(&station_id)))
+    let timetable = SubwayTimetableItem::get_train(&station_id)?;
+    Ok(HttpResponse::Ok().json(SubwayStationTimetableResponse::new(&timetable)))
 }

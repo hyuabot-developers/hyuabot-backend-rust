@@ -94,6 +94,23 @@ impl SubwayTimetableItem {
             }))
     }
 
+    pub fn get_train(station_id_query: &str) -> Result<Vec<Self>, diesel::result::Error> {
+        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
+        Ok(subway_timetable
+            .inner_join(subway_route_station)
+            .select((
+                subway_timetable_table::station_id,
+                station_name,
+                departure_time,
+                weekday,
+                up_down_type,
+            ))
+            .filter(subway_timetable_table::station_id.eq(station_id_query))
+            .order(departure_time.asc())
+            .load::<SubwayTimetableItem>(&mut conn)
+            .unwrap())
+    }
+
     pub fn get_train_by_heading(
         station_id_query: &str,
         weekday_query: &str,

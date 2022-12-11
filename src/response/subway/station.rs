@@ -279,25 +279,25 @@ impl SubwayStationTimetableArrivalItem {
 }
 
 impl SubwayStationTimetableResponse {
-    pub fn new(station_id: &str) -> Self {
+    pub fn new(timetable: &Vec<SubwayTimetableItem>) -> Self {
         Self {
-            up: SubwayStationTimetableHeading::new(station_id, "up"),
-            down: SubwayStationTimetableHeading::new(station_id, "down"),
+            up: SubwayStationTimetableHeading::new(timetable, "up"),
+            down: SubwayStationTimetableHeading::new(timetable, "down"),
         }
     }
 }
 
 impl SubwayStationTimetableHeading {
-    pub fn new(station_id: &str, heading: &str) -> Self {
+    pub fn new(timetable: &Vec<SubwayTimetableItem>, heading: &str) -> Self {
         Self {
-            weekdays: SubwayTimetableItem::get_train_by_heading(station_id, "weekdays", heading)
-                .unwrap()
+            weekdays: timetable
                 .into_iter()
+                .filter(|item| item.weekday == "weekdays" && item.up_down_type == heading)
                 .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item))
                 .collect(),
-            weekends: SubwayTimetableItem::get_train_by_heading(station_id, "weekends", heading)
-                .unwrap()
+            weekends: timetable
                 .into_iter()
+                .filter(|item| item.weekday == "weekends" && item.up_down_type == heading)
                 .map(|timetable_item| SubwayStationTimetableArrivalItem::new(&timetable_item))
                 .collect(),
         }
