@@ -10,5 +10,4 @@ pub struct ShuttleStopNameQuery {
 #[serde(rename_all = "camelCase")]
 pub struct ShuttleStopItemQuery {
     pub show_all: Option<bool>,
-    pub limit: Option<i64>,
 }

@@ -45,24 +45,6 @@ impl ShuttleRouteStopItem {
         Ok(stops)
     }
 
-    pub fn get_route_list_by_stop_name(
-        stop_name_query: &str,
-    ) -> Result<Vec<ShuttleRouteStopItemWithDescription>, diesel::result::Error> {
-        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let routes = shuttle_route_stop
-            .inner_join(shuttle_route)
-            .select((
-                shuttle_route_table::route_name,
-                cumulative_time,
-                route_description_korean,
-                route_description_english,
-            ))
-            .filter(stop_name.eq(stop_name_query))
-            .order(shuttle_route_table::route_name.asc())
-            .load::<ShuttleRouteStopItemWithDescription>(&mut conn)?;
-        Ok(routes)
-    }
-
     pub fn get_route_item_by_stop_name(
         stop_name_query: &str,
         route_name_query: &str,

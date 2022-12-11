@@ -31,14 +31,4 @@ impl ShuttleStopItem {
             .load::<ShuttleStopItem>(&mut conn)?;
         Ok(stops)
     }
-
-    pub fn get_one_by_name(
-        stop_name_query: &str,
-    ) -> Result<ShuttleStopItem, diesel::result::Error> {
-        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let stop = shuttle_stop
-            .filter(stop_name.eq(stop_name_query))
-            .first::<ShuttleStopItem>(&mut conn)?;
-        Ok(stop)
-    }
 }

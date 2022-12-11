@@ -1,9 +1,12 @@
-use crate::model::shuttle::period::ShuttlePeriodItem;
 use crate::model::shuttle::route_stop::ShuttleRouteStopItemWithDescription;
 use crate::model::shuttle::stop::ShuttleStopItem;
-use crate::model::shuttle::timetable::ShuttleTimeTableByShuttleStopItem;
-use chrono::Duration;
+use crate::model::shuttle::timetable::{
+    ShuttleStopTimeTableItem, ShuttleTimeTableByShuttleStopItem,
+};
+use chrono::{Duration, NaiveTime};
 use serde::Serialize;
+use std::borrow::Borrow;
+use std::collections::HashMap;
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -23,7 +26,7 @@ pub struct ShuttleStopListItemResponse {
 pub struct ShuttleStopItemResponse {
     pub stop_name: String,
     pub location: Option<ShuttleStopLocationResponse>,
-    pub route_list: Vec<ShuttleRouteStopResponse>,
+    pub route: Vec<ShuttleRouteStopResponse>,
 }
 
 #[derive(Serialize)]
@@ -82,18 +85,55 @@ impl ShuttleStopListItemResponse {
 
 impl ShuttleStopItemResponse {
     pub fn new(
-        stop_item: ShuttleStopItem,
-        _routes: &Vec<ShuttleRouteStopItemWithDescription>,
-        _period: &ShuttlePeriodItem,
-        _weekday: &bool,
-        _limit: &i64,
-        _show_all: &Option<bool>,
+        stop_id: String,
+        timetable: Vec<ShuttleStopTimeTableItem>,
+        weekday: &bool,
+        show_all: &Option<bool>,
     ) -> Self {
-        let route_list = Vec::new();
+        let mut timetable_by_route: HashMap<(String, String, String), Vec<(bool, NaiveTime, i32)>> =
+            HashMap::new();
+        timetable.iter().for_each(|timetable| {
+            let route_name = timetable.route_name.clone();
+            let route_description_korean = timetable.route_description_korean.clone();
+            let route_description_english = timetable.route_description_english.clone();
+            let timetable_group = timetable_by_route
+                .entry((
+                    route_name,
+                    route_description_korean.unwrap_or_default(),
+                    route_description_english.unwrap_or_default(),
+                ))
+                .or_default();
+            timetable_group.push((
+                timetable.weekday,
+                timetable.departure_time,
+                timetable.cumulative_time.unwrap_or_default(),
+            ));
+        });
+
         ShuttleStopItemResponse {
-            stop_name: stop_item.stop_name,
-            location: ShuttleStopLocationResponse::new(stop_item.latitude, stop_item.longitude),
-            route_list,
+            stop_name: stop_id,
+            location: ShuttleStopLocationResponse::new(
+                timetable[0].borrow().latitude,
+                timetable[0].borrow().longitude,
+            ),
+            route: timetable_by_route
+                .into_iter()
+                .map(
+                    |(
+                        (route_name, route_description_korean, route_description_english),
+                        timetable,
+                    )| {
+                        ShuttleRouteStopResponse::new(
+                            route_name,
+                            route_description_korean,
+                            route_description_english,
+                            timetable,
+                            weekday,
+                            show_all,
+                        )
+                    },
+                )
+                .collect(),
         }
     }
 }
@@ -113,30 +153,39 @@ impl ShuttleStopLocationResponse {
 
 impl ShuttleRouteStopResponse {
     pub fn new(
-        route: &ShuttleRouteStopItemWithDescription,
-        timetable_list: Vec<ShuttleTimeTableByShuttleStopItem>,
+        route_name: String,
+        route_description_korean: String,
+        route_description_english: String,
+        timetable: Vec<(bool, NaiveTime, i32)>,
+        weekday: &bool,
+        show_all: &Option<bool>,
     ) -> Self {
-        let description_korean = route.description_korean.clone().unwrap_or_default();
-        let description_english = route.description_english.clone().unwrap_or_default();
         let now = chrono::Local::now().time();
         ShuttleRouteStopResponse {
-            name: route.route_name.clone(),
+            name: route_name,
             description: ShuttleRouteDescriptionResponse {
-                korean: description_korean,
-                english: description_english,
+                korean: route_description_korean,
+                english: route_description_english,
             },
-            timetable: timetable_list
+            timetable: timetable
                 .iter()
-                .map(|item| {
-                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64))
-                        .to_string()
+                .filter(|(timetable_weekday, departure_time, cumulative_time)| {
+                    timetable_weekday == weekday
+                        && (*departure_time + Duration::minutes(*cumulative_time as i64) >= now
+                            || show_all.unwrap_or(false))
+                })
+                .map(|(_, departure_time, cumulative_time)| {
+                    (*departure_time + Duration::minutes(*cumulative_time as i64)).to_string()
                 })
                 .collect(),
-            arrival_list: timetable_list
+            arrival_list: timetable
                 .iter()
-                .map(|item| {
-                    (item.departure_time + Duration::minutes(route.cumulative_time.unwrap() as i64)
-                        - now)
+                .filter(|(timetable_weekday, departure_time, cumulative_time)| {
+                    timetable_weekday == weekday
+                        && (*departure_time + Duration::minutes(*cumulative_time as i64) >= now)
+                })
+                .map(|(_, departure_time, cumulative_time)| {
+                    (*departure_time + Duration::minutes(*cumulative_time as i64) - now)
                         .num_minutes()
                 })
                 .collect(),
