@@ -21,3 +21,19 @@ jobs:
       - name: Lint
         run: |
           cargo fmt -- --check
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+      - name: Update local toolchain
+        run: |
+          rustup update
+
+      - name: Toolchain info
+        run: |
+          cargo --version --verbose
+          rustc --version
+
+      - name: Build
+        run: |
+          cargo build --release
