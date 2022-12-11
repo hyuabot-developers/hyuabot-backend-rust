@@ -175,7 +175,12 @@ impl ShuttleArrivalRouteStopItem {
             name: route_name.clone(),
             arrival: timetable
                 .iter()
-                .filter(|timetable| timetable.weekday == weekday)
+                .filter(|timetable| {
+                    timetable.weekday == weekday
+                        && timetable.departure_time
+                            + Duration::minutes(timetable.cumulative_time.unwrap() as i64)
+                            > now
+                })
                 .map(|item| {
                     (item.departure_time + Duration::minutes(item.cumulative_time.unwrap() as i64)
                         - now)

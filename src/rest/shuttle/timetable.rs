@@ -13,6 +13,6 @@ pub async fn get_shuttle_timetable() -> Result<HttpResponse, CustomError> {
 
 #[get("/arrival")]
 pub async fn get_shuttle_arrival() -> Result<HttpResponse, CustomError> {
-    let timetable_list = EntireShuttleTimeTableItem::find_all_after_now()?;
+    let timetable_list = EntireShuttleTimeTableItem::find_all()?;
     Ok(HttpResponse::Ok().json(ShuttleArrivalListResponse::new(&timetable_list)))
 }

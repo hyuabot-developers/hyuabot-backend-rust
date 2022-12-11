@@ -148,33 +148,6 @@ impl EntireShuttleTimeTableItem {
             .load::<EntireShuttleTimeTableItem>(&mut conn)?;
         Ok(timetable)
     }
-
-    pub fn find_all_after_now() -> Result<Vec<Self>, diesel::result::Error> {
-        let mut conn = connection().unwrap_or_else(|_| panic!("Failed to get DB connection"));
-        let now = chrono::Local::now().naive_local();
-        let timetable = shuttle_timetable
-            .inner_join(
-                shuttle_period
-                    .on(shuttle_timetable_table::period_type.eq(shuttle_period_table::period_type)),
-            )
-            .inner_join(
-                shuttle_route_stop
-                    .on(shuttle_timetable_table::route_name
-                        .eq(shuttle_route_stop_table::route_name)),
-            )
-            .select((
-                shuttle_timetable_table::route_name,
-                shuttle_route_stop_table::stop_name,
-                weekday,
-                departure_time,
-                cumulative_time,
-            ))
-            .filter(period_start.le(now))
-            .filter(period_end.gt(now))
-            .filter(departure_time.gt(now.time()))
-            .load::<EntireShuttleTimeTableItem>(&mut conn)?;
-        Ok(timetable)
-    }
 }
 
 impl ShuttleStopTimeTableItem {
