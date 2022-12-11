@@ -8,7 +8,6 @@ WORKDIR /hyuabot-backend-rust
 RUN apk add --no-cache musl-dev libpq-dev
 
 # Copy the cargo dependencies
-COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
 # Build the application
